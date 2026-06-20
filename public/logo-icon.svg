@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#FFD54F"/>
+      <stop offset="55%" stop-color="#FF8F00"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </radialGradient>
+    <linearGradient id="leafG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#81C784"/>
+      <stop offset="100%" stop-color="#2E7D32"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="35%" cy="25%" r="50%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <filter id="s">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="rgba(0,0,0,0.25)"/>
+    </filter>
+  </defs>
+
+  <!-- Outer decorative ring -->
+  <circle cx="40" cy="40" r="39" fill="none" stroke="#FF8F00" stroke-width="1.5" opacity="0.35"/>
+
+  <!-- Main filled circle -->
+  <circle cx="40" cy="40" r="36" fill="url(#bg)" filter="url(#s)"/>
+
+  <!-- Shine -->
+  <circle cx="40" cy="40" r="36" fill="url(#shine)"/>
+
+  <!-- Leaf 1 -->
+  <ellipse cx="39" cy="9" rx="5.5" ry="9" fill="url(#leafG)" transform="rotate(-18 39 9)"/>
+  <!-- Leaf 2 -->
+  <ellipse cx="47" cy="8" rx="4" ry="7" fill="url(#leafG)" opacity="0.75" transform="rotate(12 47 8)"/>
+  <!-- Leaf 3 (small accent) -->
+  <ellipse cx="33" cy="11" rx="3" ry="5.5" fill="url(#leafG)" opacity="0.5" transform="rotate(-30 33 11)"/>
+
+  <!-- Letter P -->
+  <text
+    x="40" y="57"
+    text-anchor="middle"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-size="44"
+    font-weight="900"
+    fill="#FFFFFF"
+    filter="url(#s)"
+  >P</text>
+
+  <!-- Small dot accent below P -->
+  <circle cx="52" cy="56" r="3" fill="rgba(255,255,255,0.5)"/>
+</svg>

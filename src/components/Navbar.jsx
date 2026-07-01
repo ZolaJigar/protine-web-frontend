@@ -161,11 +161,13 @@ export default function Navbar() {
 
             <Menu
               anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleAccountClose}
-              PaperProps={{
-                sx: {
-                  borderRadius: 3, mt: 1, minWidth: 210,
-                  boxShadow: '0 8px 32px rgba(27,67,50,0.2)',
-                  border: '1px solid #E7E5E4',
+              slotProps={{
+                paper: {
+                  sx: {
+                    borderRadius: 3, mt: 1, minWidth: 210,
+                    boxShadow: '0 8px 32px rgba(27,67,50,0.2)',
+                    border: '1px solid #E7E5E4',
+                  },
                 },
               }}
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}

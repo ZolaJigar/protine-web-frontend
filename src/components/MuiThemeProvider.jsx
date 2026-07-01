@@ -1,6 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+import { useServerInsertedHTML } from 'next/navigation';
+import { CacheProvider } from '@emotion/react';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import createEmotionCache from '@/lib/emotionCache';
 
 const theme = createTheme({
   palette: {
@@ -229,10 +233,38 @@ const theme = createTheme({
 });
 
 export default function MuiThemeProvider({ children }) {
+  const [cache] = useState(() => {
+    const c = createEmotionCache();
+    c.compat = true;
+    return c;
+  });
+
+  useServerInsertedHTML(() => {
+    const names = Object.keys(cache.inserted);
+    if (names.length === 0) return null;
+    let styles = '';
+    let dataEmotion = cache.key;
+    for (const name of names) {
+      if (cache.inserted[name] !== true) {
+        styles += cache.inserted[name];
+      }
+      dataEmotion += ` ${name}`;
+    }
+    return (
+      <style
+        key={cache.key}
+        data-emotion={dataEmotion}
+        dangerouslySetInnerHTML={{ __html: styles }}
+      />
+    );
+  });
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      {children}
-    </ThemeProvider>
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </CacheProvider>
   );
 }

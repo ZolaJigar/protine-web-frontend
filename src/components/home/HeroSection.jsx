@@ -18,9 +18,9 @@ export default function HeroSection() {
       sx={{ py: { xs: 8, md: 12 }, position: 'relative', overflow: 'hidden' }}
     >
       <Container maxWidth="xl">
-        <Grid container spacing={4} alignItems="center">
+        <Grid container spacing={4} sx={{ alignItems: 'center' }}>
           {/* Left */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box className="animate-fadeInUp">
               <Chip
                 icon={<Star sx={{ color: '#F59E0B !important', fontSize: 16 }} />}
@@ -95,7 +95,7 @@ export default function HeroSection() {
           </Grid>
 
           {/* Right — floating logo */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: { xs: 300, md: 420 } }}>
               {/* Outer glow */}
               <Box sx={{ position: 'absolute', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)' }} />
@@ -152,7 +152,7 @@ export default function HeroSection() {
         {/* Stats */}
         <Grid container spacing={2} sx={{ mt: 4 }}>
           {stats.map((stat) => (
-            <Grid item xs={6} sm={3} key={stat.label}>
+            <Grid size={{ xs: 6, sm: 3 }} key={stat.label}>
               <Box
                 sx={{
                   textAlign: 'center',

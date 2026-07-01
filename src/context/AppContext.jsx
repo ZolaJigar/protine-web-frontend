@@ -51,6 +51,8 @@ function appReducer(state, action) {
       return { ...state, cart: [] };
 
     // Wishlist
+    case 'SET_WISHLIST':
+      return { ...state, wishlist: action.payload };
     case 'TOGGLE_WISHLIST': {
       const exists = state.wishlist.find((i) => i.id === action.payload.id);
       const updated = exists

@@ -88,11 +88,7 @@ export default function ForgotPasswordPage() {
                   fullWidth label="Email Address" type="email" value={email}
                   onChange={(e) => { setEmail(e.target.value); setFieldError(''); }}
                   error={!!fieldError} helperText={fieldError}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start"><Email color="action" /></InputAdornment>
-                    ),
-                  }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Email color="action" /></InputAdornment> } }}
                   sx={{ mb: 3 }}
                 />
                 <Button

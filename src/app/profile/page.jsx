@@ -184,22 +184,22 @@ export default function ProfilePage() {
                   <TextField
                     fullWidth label="Full Name" value={profile.name} disabled={!editing}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    InputProps={{ startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Person fontSize="small" /></Box> }}
+                    slotProps={{ input: { startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Person fontSize="small" /></Box> } }}
                   />
                   <TextField
                     fullWidth label="Email Address" type="email" value={profile.email} disabled={!editing}
                     onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                    InputProps={{ startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Email fontSize="small" /></Box> }}
+                    slotProps={{ input: { startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Email fontSize="small" /></Box> } }}
                   />
                   <TextField
                     fullWidth label="Mobile Number" value={profile.phone} disabled={!editing}
                     onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    InputProps={{ startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Phone fontSize="small" /></Box> }}
+                    slotProps={{ input: { startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><Phone fontSize="small" /></Box> } }}
                   />
                   <TextField
                     fullWidth label="Address" value={profile.address} disabled={!editing}
                     onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    InputProps={{ startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><LocationOn fontSize="small" /></Box> }}
+                    slotProps={{ input: { startAdornment: <Box sx={{ mr: 1, color: 'text.secondary' }}><LocationOn fontSize="small" /></Box> } }}
                   />
                 </Box>
               </Paper>

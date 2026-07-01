@@ -121,7 +121,7 @@ function StoreIllustration() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { state, dispatch } = useApp();
+  const { state, dispatch, mergeGuestCart } = useApp();
 
   const [tab, setTab]                   = useState(TAB_EMAIL);
   const [email, setEmail]               = useState('');
@@ -221,6 +221,8 @@ export default function LoginPage() {
       const stored = localStorage.getItem('accessToken');
       log.info('AUTH', `Login OK — token stored=${!!stored} length=${stored?.length}`, { userId: user.id });
       dispatch({ type: 'SET_USER', payload: user });
+      // Merge any guest cart items into the user's cart
+      await mergeGuestCart();
       toast.update(toastId, { render: `👋 Welcome back, ${user.name || 'User'}!`, type: 'success', isLoading: false, autoClose: 2000 });
       router.push('/');
     } catch (err) {
@@ -245,6 +247,8 @@ export default function LoginPage() {
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       setInStorage('user', user);
       dispatch({ type: 'SET_USER', payload: user });
+      // Merge any guest cart items into the user's cart
+      await mergeGuestCart();
       toast.update(toastId, { render: `👋 Welcome back, ${user.name || 'User'}!`, type: 'success', isLoading: false, autoClose: 2000 });
       router.push('/');
     } catch (err) {

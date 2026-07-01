@@ -119,8 +119,27 @@ export const authAPI = {
   refreshToken: (data) => api.post('/auth/refresh-token', data),
 
   logout: () => api.post('/auth/logout'),
-  getProfile: () => api.get('/auth/profile'),
-  updateProfile: (data) => api.put('/auth/profile', data),
+};
+
+// ─── PROFILE ─────────────────────────────────────────────────────────────────
+export const profileAPI = {
+  /**
+   * GET /profile — returns the logged-in user's full profile.
+   * Token identifies the user; no :id in URL.
+   */
+  get: () => api.get('/profile'),
+
+  /**
+   * PUT /profile — update profile (multipart/form-data).
+   * Editable: name, phone, country_code, gender, dob, image (file).
+   * NOT editable: email, role_id, password.
+   */
+  update: (data) => {
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    return api.put('/profile', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+  },
 };
 
 // ─── USERS ───────────────────────────────────────────────────────────────────
@@ -179,41 +198,111 @@ export const categoriesAPI = {
 };
 
 // ─── CART ─────────────────────────────────────────────────────────────────────
+// Guest callers must pass { sessionId } in options to inject x-session-id header.
+// Logged-in callers rely on the request interceptor for the Bearer token.
+const cartHeaders = (sessionId) =>
+  sessionId ? { 'x-session-id': sessionId } : {};
+
 export const cartAPI = {
-  getCart: () => api.get('/cart'),
-  addItem: (data) => api.post('/cart/items', data),
-  updateItem: (itemId, data) => api.put(`/cart/items/${itemId}`, data),
-  removeItem: (itemId) => api.delete(`/cart/items/${itemId}`),
-  clearCart: () => api.delete('/cart'),
+  /**
+   * GET /cart/list
+   * Retrieves the active cart for the current user or guest session.
+   */
+  getCart: (sessionId) =>
+    api.get('/cart/list', { headers: cartHeaders(sessionId) }),
+
+  /**
+   * POST /cart/add-item
+   * Body: { product_id, product_variant_id, quantity }
+   * Response.data.data.session_id → save to localStorage for guests
+   */
+  addItem: (data, sessionId) =>
+    api.post('/cart/add-item', data, { headers: cartHeaders(sessionId) }),
+
+  /**
+   * PUT /cart/update-item/:id  (:id = CartItem ID)
+   * Body: { quantity }
+   */
+  updateItem: (cartItemId, data, sessionId) =>
+    api.put(`/cart/update-item/${cartItemId}`, data, { headers: cartHeaders(sessionId) }),
+
+  /**
+   * DELETE /cart/remove-item/:id  (:id = CartItem ID)
+   */
+  removeItem: (cartItemId, sessionId) =>
+    api.delete(`/cart/remove-item/${cartItemId}`, { headers: cartHeaders(sessionId) }),
+
+  /**
+   * DELETE /cart/clear
+   */
+  clearCart: (sessionId) =>
+    api.delete('/cart/clear', { headers: cartHeaders(sessionId) }),
+
+  /**
+   * POST /cart/merge  — call after login to merge guest cart into user cart.
+   * Requires Authorization header (set by interceptor) + x-session-id header.
+   * Body (optional): { session_id }
+   */
+  merge: (sessionId) =>
+    api.post(
+      '/cart/merge',
+      { session_id: sessionId },
+      { headers: cartHeaders(sessionId) },
+    ),
+};
+
+// ─── ADDRESSES ───────────────────────────────────────────────────────────────
+export const addressesAPI = {
+  /** POST /addresses/list — body: { page, limit, user_id, address_type, is_default } (all optional) */
+  list: (body = {}) => api.post('/addresses/list', body),
+
+  /** GET /addresses/:id */
+  getById: (id) => api.get(`/addresses/${id}`),
+
+  /**
+   * POST /addresses/create
+   * Required: user_id, name, mobile, address_line_1, postal_code, city_id, state_id, country_id
+   * Optional: address_line_2, landmark, address_type, is_default
+   */
+  create: (data) => api.post('/addresses/create', data),
+
+  /** PUT /addresses/update/:id — same fields as create, all optional */
+  update: (id, data) => api.put(`/addresses/update/${id}`, data),
+
+  /** DELETE /addresses/delete/:id */
+  delete: (id) => api.delete(`/addresses/delete/${id}`),
+};
+
+// ─── WISHLIST ─────────────────────────────────────────────────────────────────
+export const wishlistAPI = {
+  /** POST /wishlist/add-item — { product_id, product_variant_id } */
+  addItem: (data) => api.post('/wishlist/add-item', data),
+
+  /** GET /wishlist/list */
+  getList: () => api.get('/wishlist/list'),
+
+  /** DELETE /wishlist/delete/:id  (:id = wishlist entry ID) */
+  removeItem: (id) => api.delete(`/wishlist/delete/${id}`),
+
+  /** DELETE /wishlist/clear */
+  clear: () => api.delete('/wishlist/clear'),
 };
 
 // ─── ORDERS ──────────────────────────────────────────────────────────────────
 export const ordersAPI = {
   /**
    * Place a new order from the active cart.
-   * POST /orders/place — multipart/form-data
-   * Fields: address_id (required), notes (optional)
+   * POST /orders/place
+   * Body: { address_id (required), notes (optional) }
    */
-  place: (data) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    return api.post('/orders/place', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-  },
+  place: (data) => api.post('/orders/place', data),
 
   /**
    * List orders for the logged-in user.
-   * POST /orders/list — multipart/form-data
-   * Fields: page (default 1), limit (default 10)
+   * POST /orders/list
+   * Body (optional): { page, limit }
    */
-  list: (data = {}) => {
-    const form = new FormData();
-    if (data.page) form.append('page', data.page);
-    if (data.limit) form.append('limit', data.limit);
-    return api.post('/orders/list', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+  list: (data = {}) => api.post('/orders/list', data),
 
   /**
    * Get order detail by ID.
@@ -223,16 +312,10 @@ export const ordersAPI = {
 
   /**
    * Cancel a pending or confirmed order.
-   * PUT /orders/cancel/:id — multipart/form-data
-   * Fields: cancellation_reason (optional)
+   * PUT /orders/cancel/:id
+   * Body: { cancellation_reason (optional) }
    */
-  cancel: (id, data = {}) => {
-    const form = new FormData();
-    if (data.cancellation_reason) form.append('cancellation_reason', data.cancellation_reason);
-    return api.put(`/orders/cancel/${id}`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+  cancel: (id, data = {}) => api.put(`/orders/cancel/${id}`, data),
 
   /**
    * Reorder — adds items from a previous order back into the cart.
@@ -243,6 +326,7 @@ export const ordersAPI = {
   /**
    * View invoice as HTML in browser.
    * GET /orders/invoice/view/:id
+   * Returns the URL string — open in a new tab or iframe.
    */
   viewInvoice: (id) => `${BASE_URL}/orders/invoice/view/${id}`,
 

@@ -24,8 +24,8 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage() {
-  const { state, dispatch, cartTotal } = useApp();
-  const { cart } = state;
+  const { state, clearCart, cartTotal } = useApp();
+  const { cartItems: cart } = state;
   const [activeStep, setActiveStep]     = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [loading, setLoading]           = useState(false);
@@ -72,7 +72,7 @@ export default function CheckoutPage() {
       await new Promise((r) => setTimeout(r, 1500));
       const newOrderId = `ORD-2026-${Math.floor(Math.random() * 900 + 100)}`;
       setOrderId(newOrderId);
-      dispatch({ type: 'CLEAR_CART' });
+      await clearCart();
       toast.update(toastId, { render: `🎉 Order ${newOrderId} placed!`, type: 'success', isLoading: false, autoClose: 4000 });
       setOrdered(true);
     } catch {
@@ -299,9 +299,11 @@ export default function CheckoutPage() {
               {cart.map((item) => (
                 <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2" sx={{ flex: 1, color: '#57534E' }}>
-                    {item.name} <Typography component="span" variant="caption" sx={{ color: '#A8A29E' }}>× {item.quantity}</Typography>
+                    {item.product?.name ?? item.name}{item.productVariant?.name ? ` — ${item.productVariant.name}` : ''}
+                    {' '}
+                    <Typography component="span" variant="caption" sx={{ color: '#A8A29E' }}>× {item.quantity}</Typography>
                   </Typography>
-                  <Typography variant="body2" fontWeight={600}>{formatCurrency(item.price * item.quantity)}</Typography>
+                  <Typography variant="body2" fontWeight={600}>{formatCurrency(item.total_price ?? (item.price * item.quantity))}</Typography>
                 </Box>
               ))}
             </Box>

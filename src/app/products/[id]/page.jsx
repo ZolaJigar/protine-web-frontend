@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import {
   Box, Container, Typography, Button, Rating, Chip, Divider,
   Tabs, Tab, Paper, Avatar, CircularProgress, Alert, Grid,
-  Table, TableBody, TableCell, TableRow,
 } from '@mui/material';
 import {
   ShoppingCart, Favorite, FavoriteBorder, LocalShipping, Security,
@@ -15,11 +14,11 @@ import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
 import { useApp } from '@/context/AppContext';
 import { formatCurrency } from '@/lib/functions';
-import { productsAPI, variantsAPI } from '@/lib/api';
+import { productsAPI, variantsAPI, wishlistAPI } from '@/lib/api';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const { state, dispatch } = useApp();
+  const { state, addToCart, fetchWishlistCount } = useApp();
 
   const [product,         setProduct]         = useState(null);
   const [variants,        setVariants]        = useState([]);
@@ -28,8 +27,10 @@ export default function ProductDetailPage() {
   const [tabValue,        setTabValue]        = useState('description');
   const [loading,         setLoading]         = useState(true);
   const [error,           setError]           = useState(null);
-
-  const isWishlisted = state.wishlist.some((i) => i.id === Number(id));
+  const [addingToCart,    setAddingToCart]    = useState(false);
+  const [isWishlisted,    setIsWishlisted]    = useState(false);
+  const [wishlistItemId,  setWishlistItemId]  = useState(null); // server id for removal
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   // ── Fetch product + variants in parallel ──────────────────────────────────
   useEffect(() => {
@@ -54,6 +55,19 @@ export default function ProductDetailPage() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Check if this product is already in the wishlist (logged-in only)
+  useEffect(() => {
+    if (!id || !state.isAuthenticated) return;
+    wishlistAPI.getList()
+      .then((res) => {
+        const list  = res.data?.data?.data ?? [];
+        const match = list.find((w) => w.product_id === Number(id));
+        if (match) { setIsWishlisted(true); setWishlistItemId(match.id); }
+        else        { setIsWishlisted(false); setWishlistItemId(null); }
+      })
+      .catch(() => {}); // silently ignore — heart just stays hollow
+  }, [id, state.isAuthenticated]);
 
   if (loading) {
     return (
@@ -86,29 +100,54 @@ export default function ProductDetailPage() {
   const discountPct     = hasDiscount ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : 0;
   const categoryName    = product.category?.name ?? '';
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!selectedVariant) {
       toast.warning('Please select a variant first.');
       return;
     }
-    const cartItem = {
-      id:       `${product.id}-${selectedVariant.id}`,
-      name:     `${product.name} — ${selectedVariant.name}`,
-      price:    displayPrice,
-      image:    displayImage,
-      sku:      displaySku,
-    };
-    for (let i = 0; i < qty; i++) {
-      dispatch({ type: 'ADD_TO_CART', payload: cartItem });
+    setAddingToCart(true);
+    const toastId = toast.loading('Adding to cart…');
+    try {
+      await addToCart(product.id, selectedVariant.id, qty);
+      toast.update(toastId, {
+        render: `🛒 ${qty} × ${selectedVariant.name} added to cart!`,
+        type: 'success', isLoading: false, autoClose: 2500,
+      });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Could not add to cart. Please try again.';
+      toast.update(toastId, { render: msg, type: 'error', isLoading: false, autoClose: 3000 });
+    } finally {
+      setAddingToCart(false);
     }
-    toast.success(`🛒 ${qty} × ${selectedVariant.name} added to cart!`, { autoClose: 2500 });
   };
 
-  const handleWishlist = () => {
-    const adding = !isWishlisted;
-    dispatch({ type: 'TOGGLE_WISHLIST', payload: { id: Number(id), name: product.name, image: displayImage } });
-    if (adding) toast.success('❤️ Added to wishlist!', { autoClose: 2000 });
-    else         toast.info('💔 Removed from wishlist', { autoClose: 2000 });
+  const handleWishlist = async () => {
+    if (!state.isAuthenticated) {
+      toast.info('Please log in to save items to your wishlist.');
+      return;
+    }
+    setWishlistLoading(true);
+    try {
+      if (isWishlisted && wishlistItemId) {
+        await wishlistAPI.removeItem(wishlistItemId);
+        setIsWishlisted(false);
+        setWishlistItemId(null);
+        toast.info('💔 Removed from wishlist', { autoClose: 2000 });
+      } else {
+        const variantId = selectedVariant?.id ?? null;
+        const res       = await wishlistAPI.addItem({ product_id: Number(id), product_variant_id: variantId });
+        const newId     = res.data?.data?.id ?? null;
+        setIsWishlisted(true);
+        setWishlistItemId(newId);
+        toast.success('❤️ Added to wishlist!', { autoClose: 2000 });
+      }
+      fetchWishlistCount(); // keep navbar badge in sync
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Could not update wishlist.';
+      toast.error(msg, { autoClose: 3000 });
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   return (
@@ -252,21 +291,28 @@ export default function ProductDetailPage() {
               </Box>
 
               <Button
-                variant="contained" size="large" startIcon={<ShoppingCart />}
+                variant="contained" size="large"
+                startIcon={addingToCart ? <CircularProgress size={20} color="inherit" /> : <ShoppingCart />}
                 onClick={handleAddToCart}
-                disabled={!selectedVariant || displayStock === 0}
+                disabled={!selectedVariant || displayStock === 0 || addingToCart}
                 sx={{ flex: 1, background: 'linear-gradient(135deg, #2E7D32, #4CAF50)', py: 1.5 }}
               >
-                {displayStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {displayStock === 0 ? 'Out of Stock' : addingToCart ? 'Adding…' : 'Add to Cart'}
               </Button>
 
               <Button
                 variant="outlined" size="large"
                 onClick={handleWishlist}
+                disabled={wishlistLoading}
                 aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                 sx={{ minWidth: 52 }}
               >
-                {isWishlisted ? <Favorite color="error" /> : <FavoriteBorder />}
+                {wishlistLoading
+                  ? <CircularProgress size={22} sx={{ color: '#EF4444' }} />
+                  : isWishlisted
+                    ? <Favorite color="error" />
+                    : <FavoriteBorder />
+                }
               </Button>
             </Box>
 
@@ -301,57 +347,130 @@ export default function ProductDetailPage() {
             </Paper>
           )}
 
-          {/* Variants table */}
+          {/* Variants cards */}
           {tabValue === 'variants' && (
-            <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
-              {variants.length === 0 ? (
-                <Box sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography color="text.secondary">No variants available.</Typography>
-                </Box>
-              ) : (
-                <Box sx={{ overflowX: 'auto' }}>
-                  <Table size="small">
-                    <TableBody>
-                      {/* Header row */}
-                      <TableRow sx={{ bgcolor: '#1B4332' }}>
-                        {['Variant', 'SKU', 'Weight', 'MRP', 'Price', 'Stock', 'Status'].map((h) => (
-                          <TableCell key={h} sx={{ color: '#FFF8F0', fontWeight: 700, py: 1.5 }}>{h}</TableCell>
-                        ))}
-                      </TableRow>
-                      {variants.map((v) => (
-                        <TableRow
-                          key={v.id}
-                          onClick={() => setSelectedVariant(v)}
+            variants.length === 0 ? (
+              <Paper sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
+                <Typography color="text.secondary">No variants available.</Typography>
+              </Paper>
+            ) : (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(3, 1fr)',
+                    lg: 'repeat(4, 1fr)',
+                  },
+                  gap: 2,
+                }}
+              >
+                {variants.map((v) => {
+                  const price      = parseFloat(v.selling_price);
+                  const mrp        = parseFloat(v.mrp);
+                  const hasDisc    = mrp > price;
+                  const discPct    = hasDisc ? Math.round(((mrp - price) / mrp) * 100) : 0;
+                  const available  = v.is_active && v.quantity > 0;
+                  const isSelected = selectedVariant?.id === v.id;
+
+                  return (
+                    <Paper
+                      key={v.id}
+                      onClick={() => available && setSelectedVariant(v)}
+                      sx={{
+                        p: 2, borderRadius: 3,
+                        border: '2px solid',
+                        borderColor: isSelected ? '#1B4332' : '#E2E8F0',
+                        bgcolor: isSelected ? '#F0FDF4' : '#fff',
+                        cursor: available ? 'pointer' : 'not-allowed',
+                        opacity: available ? 1 : 0.55,
+                        transition: 'all 0.2s',
+                        '&:hover': available ? {
+                          borderColor: '#1B4332',
+                          boxShadow: '0 4px 16px rgba(27,67,50,0.12)',
+                          transform: 'translateY(-2px)',
+                        } : {},
+                        position: 'relative',
+                      }}
+                    >
+                      {/* Selected badge */}
+                      {isSelected && (
+                        <Chip
+                          label="Selected"
+                          size="small"
                           sx={{
-                            cursor: 'pointer',
-                            bgcolor: selectedVariant?.id === v.id ? '#D8F3DC' : 'inherit',
-                            '&:hover': { bgcolor: '#F0FDF4' },
+                            position: 'absolute', top: 10, right: 10,
+                            bgcolor: '#1B4332', color: '#fff',
+                            fontWeight: 700, fontSize: 10, height: 20,
                           }}
-                        >
-                          <TableCell sx={{ fontWeight: 600 }}>{v.name}</TableCell>
-                          <TableCell>{v.sku}</TableCell>
-                          <TableCell>{v.weight} {v.weight_unit}</TableCell>
-                          <TableCell sx={{ textDecoration: 'line-through', color: 'text.secondary' }}>
-                            {formatCurrency(parseFloat(v.mrp))}
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: '#1B4332' }}>
-                            {formatCurrency(parseFloat(v.selling_price))}
-                          </TableCell>
-                          <TableCell>{v.quantity}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={v.is_active && v.quantity > 0 ? 'Available' : 'Unavailable'}
-                              color={v.is_active && v.quantity > 0 ? 'success' : 'error'}
-                              size="small"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Box>
-              )}
-            </Paper>
+                        />
+                      )}
+
+                      {/* Discount badge */}
+                      {hasDisc && available && (
+                        <Chip
+                          label={`${discPct}% OFF`}
+                          color="error"
+                          size="small"
+                          sx={{
+                            position: 'absolute', top: isSelected ? 34 : 10, right: 10,
+                            fontWeight: 700, fontSize: 10, height: 20,
+                          }}
+                        />
+                      )}
+
+                      {/* Name */}
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={700}
+                        sx={{ mb: 1.5, pr: 6, lineHeight: 1.3 }}
+                      >
+                        {v.name}
+                      </Typography>
+
+                      {/* Price row */}
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
+                        <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>
+                          {formatCurrency(price)}
+                        </Typography>
+                        {hasDisc && (
+                          <Typography
+                            variant="caption"
+                            sx={{ textDecoration: 'line-through', color: 'text.secondary' }}
+                          >
+                            {formatCurrency(mrp)}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {/* Meta row */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4, mb: 1.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          SKU: <strong>{v.sku ?? '—'}</strong>
+                        </Typography>
+                        {v.weight && (
+                          <Typography variant="caption" color="text.secondary">
+                            Weight: <strong>{v.weight} {v.weight_unit}</strong>
+                          </Typography>
+                        )}
+                        <Typography variant="caption" color="text.secondary">
+                          Stock: <strong>{v.quantity}</strong>
+                        </Typography>
+                      </Box>
+
+                      {/* Status chip */}
+                      <Chip
+                        label={available ? 'Available' : 'Unavailable'}
+                        color={available ? 'success' : 'error'}
+                        size="small"
+                        sx={{ fontWeight: 600, fontSize: 11 }}
+                      />
+                    </Paper>
+                  );
+                })}
+              </Box>
+            )
           )}
         </Box>
       </Container>

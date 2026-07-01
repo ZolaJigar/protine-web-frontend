@@ -29,7 +29,7 @@ function HideOnScroll({ children }) {
 }
 
 export default function Navbar() {
-  const { state, dispatch, cartCount } = useApp();
+  const { state, dispatch, cartCount, wishlistCount } = useApp();
   const [drawerOpen, setDrawerOpen]   = useState(false);
   const [searchOpen, setSearchOpen]   = useState(false);
   const [anchorEl, setAnchorEl]       = useState(null);
@@ -133,7 +133,7 @@ export default function Navbar() {
             {/* Wishlist */}
             <Link href="/wishlist" style={{ textDecoration: 'none' }}>
               <IconButton sx={{ color: '#FFF8F0' }} aria-label="Wishlist">
-                <Badge badgeContent={state.wishlist.length} sx={{ '& .MuiBadge-badge': { bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 700 } }}>
+                <Badge badgeContent={wishlistCount} sx={{ '& .MuiBadge-badge': { bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 700 } }}>
                   <Favorite />
                 </Badge>
               </IconButton>

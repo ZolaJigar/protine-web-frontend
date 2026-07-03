@@ -1,341 +1,724 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Box, Container, Grid, Typography, Paper, TextField, Button, Divider,
-  Radio, RadioGroup, FormControlLabel, FormControl, Stepper,
-  Step, StepLabel, CircularProgress,
+  Box, Container, Typography, Paper, Button, Divider,
+  CircularProgress, Alert, Stepper, Step, StepLabel, Chip,
+  TextField, Radio, FormControlLabel, IconButton, Skeleton,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import {
-  LocationOn, Payment, CheckCircle, CreditCard, AccountBalance, PhoneAndroid,
+  LocationOn, LocalOffer, CheckCircle, Add, Edit,
+  ArrowForward, ArrowBack, ShoppingCart,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
 import { useApp } from '@/context/AppContext';
-import { formatCurrency, calculateGST } from '@/lib/functions';
+import { addressesAPI, couponsAPI, ordersAPI } from '@/lib/api';
+import { formatCurrency, formatDate } from '@/lib/functions';
 
-const steps = ['Delivery Address', 'Payment', 'Confirm Order'];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmt = (v) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 })
+    .format(Number(v) || 0);
 
-const paymentMethods = [
-  { value: 'upi',        label: 'UPI',                 icon: <PhoneAndroid /> },
-  { value: 'card',       label: 'Credit / Debit Card', icon: <CreditCard /> },
-  { value: 'netbanking', label: 'Net Banking',          icon: <AccountBalance /> },
-  { value: 'cod',        label: 'Cash on Delivery',     icon: <Payment /> },
-];
+const STEPS = ['Select Address', 'Apply Coupon', 'Confirm & Place'];
 
-export default function CheckoutPage() {
-  const { state, clearCart, cartTotal } = useApp();
-  const { cartItems: cart } = state;
-  const [activeStep, setActiveStep]     = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('upi');
-  const [loading, setLoading]           = useState(false);
-  const [ordered, setOrdered]           = useState(false);
-  const [orderId, setOrderId]           = useState('');
+// ─── Address Card ─────────────────────────────────────────────────────────────
+function AddressCard({ address, selected, onSelect }) {
+  return (
+    <Paper
+      onClick={onSelect}
+      elevation={selected ? 4 : 1}
+      sx={{
+        p: 2.5, borderRadius: 3, cursor: 'pointer', border: '2px solid',
+        borderColor: selected ? '#1B4332' : '#E7E5E4',
+        bgcolor: selected ? '#D8F3DC' : '#fff',
+        transition: 'all 0.2s',
+        '&:hover': { borderColor: '#1B4332' },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+        <FormControlLabel
+          control={<Radio checked={selected} onChange={onSelect} sx={{ color: '#1B4332', '&.Mui-checked': { color: '#1B4332' }, pt: 0 }} />}
+          label=""
+          sx={{ m: 0 }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 0.5 }}>
+            <Typography variant="subtitle2" fontWeight={700}>{address.name}</Typography>
+            <Chip label={address.address_type} size="small" sx={{ fontSize: 10, height: 18, textTransform: 'capitalize' }} />
+            {address.is_default && <Chip label="Default" size="small" color="success" sx={{ fontSize: 10, height: 18 }} />}
+          </Box>
+          <Typography variant="body2" color="text.secondary">{address.mobile}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+            {address.address_line_1}
+            {address.address_line_2 ? `, ${address.address_line_2}` : ''}
+            {address.landmark ? ` (${address.landmark})` : ''}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {address.city?.name}, {address.state?.name} — {address.postal_code}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">{address.country?.name}</Typography>
+        </Box>
+      </Box>
+    </Paper>
+  );
+}
 
-  const [address, setAddress] = useState({
-    fullName: state.user?.name || '', phone: state.user?.phone || '',
-    line1: '', line2: '', city: '', state: '', pincode: '',
+// ─── New Address Form ─────────────────────────────────────────────────────────
+function AddressForm({ userId, onSaved, onCancel }) {
+  const [form, setForm] = useState({
+    name: '', mobile: '', email: '',
+    address_line_1: '', address_line_2: '', landmark: '',
+    postal_code: '', address_type: 'home', is_default: false,
+    city_id: '', state_id: '', country_id: '',
   });
-  const [addrErrors, setAddrErrors] = useState({});
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
-  const gst       = calculateGST(cartTotal);
-  const shipping  = cartTotal >= 499 ? 0 : 49;
-  const grandTotal = cartTotal + gst + shipping;
+  const field = (key) => ({
+    value: form[key],
+    onChange: (e) => setForm((p) => ({ ...p, [key]: e.target.value })),
+    error: !!errors[key],
+    helperText: errors[key] || '',
+    size: 'small',
+    fullWidth: true,
+  });
 
-  const validateAddress = () => {
-    const errs = {};
-    if (!address.fullName.trim())                      errs.fullName = 'Required';
-    if (!address.phone || address.phone.length !== 10) errs.phone    = 'Enter valid 10-digit number';
-    if (!address.line1.trim())                         errs.line1    = 'Required';
-    if (!address.city.trim())                          errs.city     = 'Required';
-    if (!address.state.trim())                         errs.state    = 'Required';
-    if (!address.pincode || address.pincode.length !== 6) errs.pincode = 'Enter valid 6-digit pincode';
-    return errs;
+  const handleSave = async () => {
+    setSaving(true);
+    setErrors({});
+    try {
+      const payload = {
+        ...form,
+        user_id: userId,
+        city_id: Number(form.city_id),
+        state_id: Number(form.state_id),
+        country_id: Number(form.country_id),
+        is_default: form.is_default ? 1 : 0,
+      };
+      const res = await addressesAPI.create(payload);
+      onSaved(res.data?.data);
+    } catch (err) {
+      const data = err?.response?.data;
+      if (data?.errors && typeof data.errors === 'object') {
+        setErrors(data.errors);
+        toast.error('Please fix the highlighted fields.');
+      } else {
+        toast.error(data?.message || 'Could not save address.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mt: 2 }}>
+      <TextField label="Full Name *" {...field('name')} />
+      <TextField label="Mobile *" {...field('mobile')} inputProps={{ maxLength: 10 }} />
+      <TextField label="Email" {...field('email')} sx={{ gridColumn: { sm: '1 / -1' } }} />
+      <TextField label="Address Line 1 *" {...field('address_line_1')} sx={{ gridColumn: { sm: '1 / -1' } }} />
+      <TextField label="Address Line 2" {...field('address_line_2')} sx={{ gridColumn: { sm: '1 / -1' } }} />
+      <TextField label="Landmark" {...field('landmark')} sx={{ gridColumn: { sm: '1 / -1' } }} />
+      <TextField label="Postal Code *" {...field('postal_code')} inputProps={{ maxLength: 6 }} />
+      <TextField label="Address Type" {...field('address_type')} select SelectProps={{ native: true }}>
+        {['home', 'work', 'other'].map((t) => <option key={t} value={t}>{t}</option>)}
+      </TextField>
+      <TextField label="City ID *" {...field('city_id')} type="number" />
+      <TextField label="State ID *" {...field('state_id')} type="number" />
+      <TextField label="Country ID *" {...field('country_id')} type="number" />
+      <Box sx={{ gridColumn: { sm: '1 / -1' }, display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 1 }}>
+        <Button onClick={onCancel} variant="text" disabled={saving}>Cancel</Button>
+        <Button onClick={handleSave} variant="contained" disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
+          sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
+          Save Address
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+// ─── Order Summary Sidebar ────────────────────────────────────────────────────
+function OrderSummary({ summary, coupon, items }) {
+  const subtotal  = Number(summary.subtotal_amount || 0);
+  const discount  = coupon ? Number(coupon.discount_amount || 0) : 0;
+  const tax       = Number(summary.tax_amount || 0);
+  const shipping  = Number(summary.shipping_amount || 0);
+  const total     = subtotal - discount + tax + shipping;
+
+  return (
+    <Paper sx={{ p: 3, borderRadius: 3, position: { md: 'sticky' }, top: { md: 88 } }}>
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Order Summary</Typography>
+
+      {/* Items list */}
+      {items.length > 0 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+          {items.map((item) => (
+            <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: '#57534E', flex: 1 }}>
+                {item.product?.name ?? item.product_name}
+                {item.productVariant?.name ? ` — ${item.productVariant.name}` : ''}
+                {' '}<Typography component="span" variant="caption" color="text.disabled">×{item.quantity}</Typography>
+              </Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>
+                {fmt(item.total_price)}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      <Divider sx={{ my: 1.5 }} />
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography color="text.secondary">Subtotal</Typography>
+          <Typography fontWeight={600}>{fmt(subtotal)}</Typography>
+        </Box>
+        {discount > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography color="text.secondary">
+              Coupon <Chip label={coupon.coupon_code} size="small" sx={{ fontSize: 10, height: 18, ml: 0.5 }} />
+            </Typography>
+            <Typography fontWeight={600} color="success.main">− {fmt(discount)}</Typography>
+          </Box>
+        )}
+        {tax > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography color="text.secondary">Tax</Typography>
+            <Typography fontWeight={600}>{fmt(tax)}</Typography>
+          </Box>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography color="text.secondary">Shipping</Typography>
+          <Typography fontWeight={600} color={shipping === 0 ? 'success.main' : 'text.primary'}>
+            {shipping === 0 ? 'FREE' : fmt(shipping)}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="h6" fontWeight={700}>Total</Typography>
+        <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>{fmt(total)}</Typography>
+      </Box>
+    </Paper>
+  );
+}
+
+// ─── Step 1: Address ──────────────────────────────────────────────────────────
+function AddressStep({ user, selectedId, onSelect, onSelectObj }) {
+  const [addresses, setAddresses] = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [showForm, setShowForm]   = useState(false);
+  const [error, setError]         = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res  = await addressesAPI.list({ user_id: user?.id });
+      const list = res.data?.data?.data ?? [];
+      setAddresses(list);
+      // Auto-select default or first
+      if (!selectedId && list.length > 0) {
+        const def = list.find((a) => a.is_default) ?? list[0];
+        onSelect(def.id);
+        onSelectObj?.(def);
+      }
+    } catch {
+      setError('Could not load addresses.');
+    } finally {
+      setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleAddressSaved = (newAddr) => {
+    setShowForm(false);
+    toast.success('Address saved!');
+    load();
+    if (newAddr?.id) onSelect(newAddr.id);
+  };
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {[1, 2].map((i) => <Skeleton key={i} variant="rounded" height={110} />)}
+    </Box>
+  );
+
+  if (error) return (
+    <Alert severity="error" action={<Button size="small" onClick={load}>Retry</Button>}>{error}</Alert>
+  );
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={700}>Saved Addresses</Typography>
+        <Button size="small" startIcon={<Add />} onClick={() => setShowForm((p) => !p)}
+          sx={{ fontWeight: 600, color: '#1B4332' }}>
+          {showForm ? 'Cancel' : 'Add New'}
+        </Button>
+      </Box>
+
+      {showForm && (
+        <Paper sx={{ p: 2.5, borderRadius: 3, mb: 2, bgcolor: '#F8FAFC' }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>New Address</Typography>
+          <AddressForm userId={user?.id} onSaved={handleAddressSaved} onCancel={() => setShowForm(false)} />
+        </Paper>
+      )}
+
+      {addresses.length === 0 && !showForm && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <LocationOn sx={{ fontSize: 56, color: '#CBD5E1', mb: 1 }} />
+          <Typography color="text.secondary">No saved addresses yet. Add one above.</Typography>
+        </Box>
+      )}
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {addresses.map((addr) => (
+          <AddressCard
+            key={addr.id}
+            address={addr}
+            selected={selectedId === addr.id}
+            onSelect={() => { onSelect(addr.id); onSelectObj?.(addr); }}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+// ─── Step 2: Coupon ───────────────────────────────────────────────────────────
+function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
+  const [code, setCode]         = useState(appliedCoupon?.coupon_code ?? '');
+  const [validating, setValidating] = useState(false);
+  const [available, setAvailable]   = useState([]);
+  const [loadingList, setLoadingList] = useState(false);
+  const [showList, setShowList]     = useState(false);
+  const [error, setError]           = useState('');
+
+  useEffect(() => {
+    if (code === '' && appliedCoupon) setCode(appliedCoupon.coupon_code);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedCoupon]);
+
+  const loadAvailable = async () => {
+    setLoadingList(true);
+    try {
+      const res = await couponsAPI.getAvailable();
+      setAvailable(res.data?.data?.data ?? []);
+      setShowList(true);
+    } catch {
+      toast.error('Could not load coupons.');
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  const handleApply = async (couponCode = code) => {
+    const trimmed = (couponCode || '').trim().toUpperCase();
+    if (!trimmed) { setError('Enter a coupon code.'); return; }
+    setValidating(true);
+    setError('');
+    try {
+      const res = await couponsAPI.validate({ coupon_code: trimmed, order_amount: subtotal });
+      onApply(res.data?.data);
+      toast.success(`Coupon "${trimmed}" applied! You saved ${fmt(res.data?.data?.discount_amount)}`);
+      setShowList(false);
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Invalid coupon.';
+      setError(msg);
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  return (
+    <Box>
+      <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Have a coupon?</Typography>
+
+      {appliedCoupon ? (
+        <Paper sx={{ p: 2.5, borderRadius: 3, bgcolor: '#D8F3DC', border: '2px solid #1B4332', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocalOffer sx={{ color: '#1B4332', fontSize: 20 }} />
+              <Typography fontWeight={700} color="#1B4332">{appliedCoupon.coupon_code}</Typography>
+            </Box>
+            <Typography variant="body2" color="#2D6A4F" sx={{ mt: 0.5 }}>
+              You save {fmt(appliedCoupon.discount_amount)} → Final: {fmt(appliedCoupon.final_amount)}
+            </Typography>
+          </Box>
+          <Button size="small" color="error" onClick={() => { onRemove(); setCode(''); }} sx={{ fontWeight: 700 }}>
+            Remove
+          </Button>
+        </Paper>
+      ) : (
+        <>
+          <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
+            <TextField
+              size="small" fullWidth placeholder="Enter coupon code"
+              value={code} onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
+              error={!!error} helperText={error}
+              onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+              inputProps={{ style: { textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 } }}
+            />
+            <Button variant="contained" onClick={() => handleApply()} disabled={validating || !code.trim()}
+              sx={{ px: 3, whiteSpace: 'nowrap', background: '#1B4332', '&:hover': { background: '#0D2B1F' } }}>
+              {validating ? <CircularProgress size={18} color="inherit" /> : 'Apply'}
+            </Button>
+          </Box>
+          <Button size="small" onClick={loadAvailable} disabled={loadingList}
+            startIcon={loadingList ? <CircularProgress size={14} /> : <LocalOffer />}
+            sx={{ color: '#1B4332', fontWeight: 600 }}>
+            View available coupons
+          </Button>
+        </>
+      )}
+
+      {showList && available.length > 0 && (
+        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {available.map((c) => (
+            <Paper key={c.id} sx={{ p: 2, borderRadius: 2, border: '1.5px dashed #CBD5E1' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#1B4332' }}>{c.coupon_code}</Typography>
+                  <Typography variant="body2" color="text.secondary">{c.title}</Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    {c.discount_type === 'percentage' ? `${c.discount_value}% off` : `₹${c.discount_value} off`}
+                    {c.minimum_order_amount > 0 ? ` · Min ₹${c.minimum_order_amount}` : ''}
+                    {c.end_date ? ` · Valid till ${formatDate(c.end_date)}` : ''}
+                  </Typography>
+                </Box>
+                <Button size="small" variant="outlined" onClick={() => { setCode(c.coupon_code); handleApply(c.coupon_code); }}
+                  sx={{ mt: 0.5, fontSize: 12, color: '#1B4332', borderColor: '#1B4332', '&:hover': { bgcolor: '#D8F3DC' } }}>
+                  Apply
+                </Button>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+// ─── Step 3: Confirm ──────────────────────────────────────────────────────────
+function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
+  const subtotal  = Number(summary.subtotal_amount || 0);
+  const discount  = coupon ? Number(coupon.discount_amount || 0) : 0;
+  const tax       = Number(summary.tax_amount || 0);
+  const shipping  = Number(summary.shipping_amount || 0);
+  const total     = subtotal - discount + tax + shipping;
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Address review */}
+      <Paper sx={{ p: 2.5, borderRadius: 3 }}>
+        <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 1.5 }}>
+          Delivering To
+        </Typography>
+        <Typography variant="subtitle1" fontWeight={700} sx={{ mt: 0.5 }}>{address?.name}</Typography>
+        <Typography variant="body2" color="text.secondary">{address?.mobile}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {address?.address_line_1}{address?.address_line_2 ? `, ${address.address_line_2}` : ''}
+          {address?.landmark ? ` (${address.landmark})` : ''}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {address?.city?.name}, {address?.state?.name} — {address?.postal_code}
+        </Typography>
+      </Paper>
+
+      {/* Coupon summary */}
+      {coupon && (
+        <Paper sx={{ p: 2, borderRadius: 3, bgcolor: '#D8F3DC', border: '1px solid #52B788' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocalOffer sx={{ color: '#1B4332', fontSize: 18 }} />
+            <Typography variant="body2" fontWeight={700} color="#1B4332">
+              Coupon <strong>{coupon.coupon_code}</strong> applied — saving {fmt(discount)}
+            </Typography>
+          </Box>
+        </Paper>
+      )}
+
+      {/* Amounts */}
+      <Paper sx={{ p: 2.5, borderRadius: 3 }}>
+        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>Amount Breakdown</Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography color="text.secondary">Subtotal</Typography><Typography>{fmt(subtotal)}</Typography>
+          </Box>
+          {discount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color="text.secondary">Discount</Typography>
+              <Typography color="success.main">− {fmt(discount)}</Typography>
+            </Box>
+          )}
+          {tax > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color="text.secondary">Tax</Typography><Typography>{fmt(tax)}</Typography>
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography color="text.secondary">Shipping</Typography>
+            <Typography color={shipping === 0 ? 'success.main' : 'text.primary'}>
+              {shipping === 0 ? 'FREE' : fmt(shipping)}
+            </Typography>
+          </Box>
+          <Divider sx={{ my: 0.5 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography fontWeight={800} variant="subtitle1">Total</Typography>
+            <Typography fontWeight={900} variant="subtitle1" sx={{ color: '#1B4332' }}>{fmt(total)}</Typography>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Order notes */}
+      <TextField
+        label="Order Notes (optional)" multiline rows={2} size="small" fullWidth
+        placeholder="e.g. Leave at door, call before delivery…"
+        value={notes} onChange={(e) => onNotesChange(e.target.value)}
+        inputProps={{ maxLength: 500 }}
+        helperText={`${notes.length}/500`}
+      />
+    </Box>
+  );
+}
+
+// ─── Success Screen ───────────────────────────────────────────────────────────
+function OrderSuccess({ order }) {
+  return (
+    <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
+      <Box sx={{ textAlign: 'center', maxWidth: 480 }}>
+        <CheckCircle sx={{ fontSize: 96, color: 'success.main', mb: 2 }} />
+        <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>Order Placed! 🎉</Typography>
+        <Typography color="text.secondary" sx={{ mb: 1 }}>
+          Your order has been confirmed and will be processed shortly.
+        </Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1B4332', mb: 0.5 }}>
+          {order.order_number}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Placed on {formatDate(order.placedAt)}
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
+          <Button
+            component={Link} href={`/orders/${order.id}`} variant="contained"
+            endIcon={<ArrowForward />}
+            sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', borderRadius: '50px', px: 4, fontWeight: 700 }}>
+            Track Order
+          </Button>
+          <Button component={Link} href="/products" variant="outlined"
+            sx={{ borderRadius: '50px', px: 4, fontWeight: 700, borderColor: '#1B4332', color: '#1B4332' }}>
+            Continue Shopping
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ─── Main Checkout Page ───────────────────────────────────────────────────────
+export default function CheckoutPage() {
+  const router          = useRouter();
+  const { state, fetchCart } = useApp();
+  const user            = state.user;
+  const summary         = state.cartSummary;
+  const items           = state.cartItems;
+
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Address
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [selectedAddress,   setSelectedAddressObj] = useState(null);
+
+  // Coupon
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  // Notes
+  const [notes, setNotes] = useState('');
+
+  // Place order
+  const [placing, setPlacing]   = useState(false);
+  const [placedOrder, setPlacedOrder] = useState(null);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !state.isAuthenticated) {
+      router.replace('/login?redirect=/checkout');
+    }
+  }, [state.isAuthenticated, router]);
+
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (!state.isAuthenticated) return;
+    if (items.length === 0 && summary.total_items === 0) {
+      toast.info('Your cart is empty.');
+      router.replace('/cart');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, state.isAuthenticated]);
+
+  const handleAddressSelect = (id, addressObj) => {
+    setSelectedAddressId(id);
+    if (addressObj) setSelectedAddressObj(addressObj);
+  };
+
+  // When address step: load the address object for confirm step preview
+  // Capture selected address ID and the full object for the confirm step preview
+  const handleAddressIdSelect = (id, addrObj) => {
+    setSelectedAddressId(id);
+    if (addrObj) setSelectedAddressObj(addrObj);
   };
 
   const handleNext = () => {
-    if (activeStep === 0) {
-      const errs = validateAddress();
-      if (Object.keys(errs).length) { setAddrErrors(errs); toast.error('Please fill all required address fields.'); return; }
-      toast.success('📍 Address saved!', { autoClose: 1500 });
-    }
-    if (activeStep === 1) {
-      toast.success(`💳 Payment: ${paymentMethods.find(m => m.value === paymentMethod)?.label}`, { autoClose: 1500 });
+    if (activeStep === 0 && !selectedAddressId) {
+      toast.error('Please select or add a delivery address.');
+      return;
     }
     setActiveStep((s) => s + 1);
   };
 
+  const handleBack = () => setActiveStep((s) => s - 1);
+
   const handlePlaceOrder = async () => {
-    setLoading(true);
-    const toastId = toast.loading('Placing your order...');
+    if (!selectedAddressId) { toast.error('Please select a delivery address.'); return; }
+    setPlacing(true);
+    const toastId = toast.loading('Placing your order…');
     try {
-      await new Promise((r) => setTimeout(r, 1500));
-      const newOrderId = `ORD-2026-${Math.floor(Math.random() * 900 + 100)}`;
-      setOrderId(newOrderId);
-      await clearCart();
-      toast.update(toastId, { render: `🎉 Order ${newOrderId} placed!`, type: 'success', isLoading: false, autoClose: 4000 });
-      setOrdered(true);
-    } catch {
-      toast.update(toastId, { render: 'Something went wrong. Please try again.', type: 'error', isLoading: false, autoClose: 4000 });
+      const payload = { address_id: selectedAddressId };
+      if (appliedCoupon?.coupon_code) payload.coupon_code = appliedCoupon.coupon_code;
+      if (notes.trim()) payload.notes = notes.trim();
+
+      const res = await ordersAPI.place(payload);
+      const order = res.data?.data;
+      toast.update(toastId, {
+        render: `🎉 Order ${order.order_number} placed!`,
+        type: 'success', isLoading: false, autoClose: 4000,
+      });
+      await fetchCart(); // clear cart badge
+      setPlacedOrder(order);
+    } catch (err) {
+      const data = err?.response?.data;
+      let msg = data?.message || 'Something went wrong. Please try again.';
+      // Validation errors — show the first field error
+      if (data?.errors && typeof data.errors === 'object') {
+        const firstKey = Object.keys(data.errors)[0];
+        msg = data.errors[firstKey] || msg;
+      }
+      toast.update(toastId, { render: msg, type: 'error', isLoading: false, autoClose: 5000 });
+
+      // Stock errors — go back to cart
+      if (msg.toLowerCase().includes('stock') || msg.toLowerCase().includes('available')) {
+        setTimeout(() => router.replace('/cart'), 2500);
+      }
+      // Coupon errors — remove coupon and stay on coupon step
+      if (
+        msg.toLowerCase().includes('coupon') ||
+        msg.toLowerCase().includes('usage limit') ||
+        msg.toLowerCase().includes('first order')
+      ) {
+        setAppliedCoupon(null);
+        setActiveStep(1);
+      }
     } finally {
-      setLoading(false);
+      setPlacing(false);
     }
   };
 
-  if (ordered) {
-    return (
-      <MainLayout>
-        <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ textAlign: 'center', px: 2 }}>
-            <CheckCircle sx={{ fontSize: 100, color: 'success.main', mb: 2 }} />
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>Order Placed Successfully! 🎉</Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-              Your order is confirmed. A WhatsApp update will be sent shortly.
-            </Typography>
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700, mb: 3 }}>
-              Order ID: {orderId}
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-              <Button href="/orders" variant="contained">Track Order</Button>
-              <Button href="/products" variant="outlined">Continue Shopping</Button>
-            </Box>
-          </Box>
-        </Box>
-      </MainLayout>
-    );
+  if (placedOrder) {
+    return <MainLayout><OrderSuccess order={placedOrder} /></MainLayout>;
   }
+
+  if (!state.isAuthenticated) return null;
+
+  const stepContent = [
+    <AddressStep
+      key="addr"
+      user={user}
+      selectedId={selectedAddressId}
+      onSelect={handleAddressIdSelect}
+      onSelectObj={setSelectedAddressObj}
+    />,
+    <CouponStep
+      key="coupon"
+      subtotal={Number(summary.subtotal_amount || 0)}
+      appliedCoupon={appliedCoupon}
+      onApply={setAppliedCoupon}
+      onRemove={() => setAppliedCoupon(null)}
+    />,
+    <ConfirmStep
+      key="confirm"
+      address={selectedAddress}
+      coupon={appliedCoupon}
+      notes={notes}
+      onNotesChange={setNotes}
+      summary={summary}
+    />,
+  ];
 
   return (
     <MainLayout>
       {/* Banner */}
       <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
         <Container maxWidth="xl">
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>Checkout</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ShoppingCart sx={{ fontSize: 32 }} />
+            <Typography variant="h4" fontWeight={800}>Checkout</Typography>
+          </Box>
         </Container>
       </Box>
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Stepper — full width */}
+        {/* Stepper */}
         <Paper sx={{ p: 3, borderRadius: 3, mb: 3 }}>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label) => (
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {STEPS.map((label) => (
               <Step key={label}><StepLabel>{label}</StepLabel></Step>
             ))}
           </Stepper>
         </Paper>
 
-        {/* Two-column layout: form | summary */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '1fr 340px' },
-            gap: 3,
-            alignItems: 'start',
-            width: '100%',
-          }}
-        >
-          {/* ── Left: step content ── */}
-          <Box sx={{ width: '100%', minWidth: 0 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 340px' }, gap: 3, alignItems: 'start' }}>
+          {/* Main content */}
+          <Box>
+            <Paper sx={{ p: 3, borderRadius: 3, mb: 2.5 }}>
+              {stepContent[activeStep]}
+            </Paper>
 
-            {/* Step 0: Address */}
-            {activeStep === 0 && (
-              <Paper sx={{ p: 3, borderRadius: 3, width: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                  <LocationOn sx={{ color: '#1B4332' }} />
-                  <Typography variant="h6" fontWeight={700}>Delivery Address</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                    gap: 2.5,
-                    width: '100%',
-                  }}
-                >
-                  <TextField fullWidth label="Full Name *" value={address.fullName}
-                    onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
-                    error={!!addrErrors.fullName} helperText={addrErrors.fullName} />
-
-                  <TextField fullWidth label="Phone Number *" value={address.phone}
-                    onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                    error={!!addrErrors.phone} helperText={addrErrors.phone} />
-
-                  <TextField fullWidth label="Address Line 1 *" value={address.line1}
-                    onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-                    error={!!addrErrors.line1} helperText={addrErrors.line1}
-                    sx={{ gridColumn: { sm: '1 / -1' } }} />
-
-                  <TextField fullWidth label="Address Line 2 (Optional)" value={address.line2}
-                    onChange={(e) => setAddress({ ...address, line2: e.target.value })}
-                    sx={{ gridColumn: { sm: '1 / -1' } }} />
-
-                  <TextField fullWidth label="City *" value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    error={!!addrErrors.city} helperText={addrErrors.city} />
-
-                  <TextField fullWidth label="State *" value={address.state}
-                    onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                    error={!!addrErrors.state} helperText={addrErrors.state} />
-
-                  <TextField fullWidth label="Pincode *" value={address.pincode}
-                    onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
-                    error={!!addrErrors.pincode} helperText={addrErrors.pincode} />
-                </Box>
-              </Paper>
-            )}
-
-            {/* Step 1: Payment */}
-            {activeStep === 1 && (
-              <Paper sx={{ p: 3, borderRadius: 3, width: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                  <Payment sx={{ color: '#1B4332' }} />
-                  <Typography variant="h6" fontWeight={700}>Payment Method</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                  {paymentMethods.map((method) => (
-                    <Paper
-                      key={method.value}
-                      onClick={() => setPaymentMethod(method.value)}
-                      sx={{
-                        p: 2.5, border: '2px solid', cursor: 'pointer',
-                        borderColor: paymentMethod === method.value ? '#1B4332' : '#E7E5E4',
-                        borderRadius: 3, bgcolor: paymentMethod === method.value ? '#D8F3DC' : '#fff',
-                        transition: 'all 0.2s',
-                        '&:hover': { borderColor: '#1B4332' },
-                      }}
-                    >
-                      <FormControlLabel
-                        value={method.value}
-                        control={<Radio checked={paymentMethod === method.value} sx={{ color: '#1B4332', '&.Mui-checked': { color: '#1B4332' } }} />}
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box sx={{ color: '#1B4332' }}>{method.icon}</Box>
-                            <Typography fontWeight={600}>{method.label}</Typography>
-                          </Box>
-                        }
-                        sx={{ m: 0, width: '100%' }}
-                      />
-                    </Paper>
-                  ))}
-                </Box>
-              </Paper>
-            )}
-
-            {/* Step 2: Confirm */}
-            {activeStep === 2 && (
-              <Paper sx={{ p: 3, borderRadius: 3, width: '100%' }}>
-                <Typography variant="h6" fontWeight={700} sx={{ mb: 2.5 }}>Confirm Your Order</Typography>
-
-                <Box sx={{ p: 2, bgcolor: '#D8F3DC', borderRadius: 2, mb: 3 }}>
-                  <Typography variant="body2" sx={{ color: '#1B4332', fontWeight: 600 }}>
-                    📱 A WhatsApp confirmation will be sent to {address.phone} after ordering.
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                    gap: 3,
-                  }}
-                >
-                  <Box>
-                    <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 1.5 }}>
-                      Delivery To
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ mt: 0.5 }}>{address.fullName}</Typography>
-                    <Typography variant="body2" color="text.secondary">{address.phone}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {address.line1}{address.line2 && `, ${address.line2}`}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {address.city}, {address.state} — {address.pincode}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 1.5 }}>
-                      Payment Method
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5 }}>
-                      <Box sx={{ color: '#1B4332' }}>{paymentMethods.find((m) => m.value === paymentMethod)?.icon}</Box>
-                      <Typography variant="subtitle1" fontWeight={700}>
-                        {paymentMethods.find((m) => m.value === paymentMethod)?.label}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Paper>
-            )}
-
-            {/* Navigation buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+            {/* Navigation */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
-                disabled={activeStep === 0} onClick={() => setActiveStep((s) => s - 1)}
-                variant="outlined" sx={{ px: 4 }}
-              >
+                variant="outlined" onClick={handleBack} disabled={activeStep === 0}
+                startIcon={<ArrowBack />} sx={{ px: 3, borderRadius: '50px', fontWeight: 600 }}>
                 Back
               </Button>
-              {activeStep < steps.length - 1 ? (
-                <Button variant="contained" onClick={handleNext} sx={{ px: 5 }}>
+              {activeStep < STEPS.length - 1 ? (
+                <Button
+                  variant="contained" onClick={handleNext} endIcon={<ArrowForward />}
+                  sx={{ px: 4, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
                   Continue
                 </Button>
               ) : (
                 <Button
-                  variant="contained" onClick={handlePlaceOrder} disabled={loading}
-                  sx={{ px: 5, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' } }}
-                >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Place Order'}
+                  variant="contained" onClick={handlePlaceOrder} disabled={placing}
+                  startIcon={placing ? <CircularProgress size={18} color="inherit" /> : <CheckCircle />}
+                  sx={{ px: 5, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', boxShadow: '0 4px 14px rgba(27,67,50,0.35)', '&:hover': { background: '#0D2B1F' } }}>
+                  {placing ? 'Placing Order…' : 'Place Order'}
                 </Button>
               )}
             </Box>
           </Box>
 
-          {/* ── Right: order summary (sticky) ── */}
-          <Paper sx={{ p: 3, borderRadius: 3, position: { md: 'sticky' }, top: { md: 88 }, width: '100%' }}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Order Summary</Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-              {cart.map((item) => (
-                <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" sx={{ flex: 1, color: '#57534E' }}>
-                    {item.product?.name ?? item.name}{item.productVariant?.name ? ` — ${item.productVariant.name}` : ''}
-                    {' '}
-                    <Typography component="span" variant="caption" sx={{ color: '#A8A29E' }}>× {item.quantity}</Typography>
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>{formatCurrency(item.total_price ?? (item.price * item.quantity))}</Typography>
-                </Box>
-              ))}
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography color="text.secondary">Subtotal</Typography>
-                <Typography fontWeight={600}>{formatCurrency(cartTotal)}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography color="text.secondary">GST (18%)</Typography>
-                <Typography fontWeight={600}>{formatCurrency(gst)}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography color="text.secondary">Shipping</Typography>
-                <Typography fontWeight={600} color={shipping === 0 ? 'success.main' : 'text.primary'}>
-                  {shipping === 0 ? 'FREE' : formatCurrency(shipping)}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="h6" fontWeight={700}>Total</Typography>
-              <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>
-                {formatCurrency(grandTotal)}
-              </Typography>
-            </Box>
-          </Paper>
+          {/* Order summary */}
+          <OrderSummary summary={summary} coupon={appliedCoupon} items={items} />
         </Box>
       </Container>
     </MainLayout>

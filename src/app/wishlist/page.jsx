@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Box, Container, Typography, Button, Card, CardMedia, CardContent,
   CardActions, IconButton, Chip, Skeleton, Alert, Tooltip, CircularProgress,
@@ -246,6 +247,7 @@ function WishlistSkeleton() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function WishlistPage() {
   const { addToCart, fetchWishlistCount } = useApp();
+  const router = useRouter();
 
   const [items,    setItems]    = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -253,6 +255,15 @@ export default function WishlistPage() {
   const [clearing, setClearing] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
+    // Guard: only fetch if the user has a valid token
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login?redirect=/wishlist');
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -262,14 +273,14 @@ export default function WishlistPage() {
     } catch (err) {
       const status = err?.response?.status;
       if (status === 401) {
-        setError('Please log in to view your wishlist.');
+        router.replace('/login?redirect=/wishlist');
       } else {
         setError(err?.response?.data?.message || 'Could not load wishlist.');
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => { fetchWishlist(); }, [fetchWishlist]);
 

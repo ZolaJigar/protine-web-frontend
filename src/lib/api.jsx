@@ -65,6 +65,15 @@ api.interceptors.response.use(
       data: error.response?.data,
     });
 
+    // Attach a normalised message to the error so callers can do
+    // err?.response?.data?.message reliably even when the server returns 500 with {}
+    if (error.response && !error.response.data?.message) {
+      error.response.data = {
+        ...(error.response.data ?? {}),
+        message: message || `Server error (${status})`,
+      };
+    }
+
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       log.warn('API:REFRESH', 'Access token expired — attempting refresh');
@@ -288,12 +297,29 @@ export const wishlistAPI = {
   clear: () => api.delete('/wishlist/clear'),
 };
 
+// ─── COUPONS ──────────────────────────────────────────────────────────────────
+export const couponsAPI = {
+  /**
+   * GET /coupons/available — list all coupons visible to the user.
+   * Requires auth.
+   */
+  getAvailable: () => api.get('/coupons/available'),
+
+  /**
+   * POST /coupons/validate — validate a coupon code before order placement.
+   * Body: { coupon_code, order_amount }
+   * Response: { coupon_code, discount_type, discount_amount, final_amount }
+   * Requires auth.
+   */
+  validate: (data) => api.post('/coupons/validate', data),
+};
+
 // ─── ORDERS ──────────────────────────────────────────────────────────────────
 export const ordersAPI = {
   /**
    * Place a new order from the active cart.
    * POST /orders/place
-   * Body: { address_id (required), notes (optional) }
+   * Body: { address_id (required), coupon_code (optional), notes (optional) }
    */
   place: (data) => api.post('/orders/place', data),
 
@@ -311,9 +337,15 @@ export const ordersAPI = {
   getById: (id) => api.get(`/orders/${id}`),
 
   /**
+   * Get order tracking timeline.
+   * GET /orders/tracking/:id
+   */
+  tracking: (id) => api.get(`/orders/tracking/${id}`),
+
+  /**
    * Cancel a pending or confirmed order.
    * PUT /orders/cancel/:id
-   * Body: { cancellation_reason (optional) }
+   * Body: { cancellation_reason (min 3, max 500 chars) }
    */
   cancel: (id, data = {}) => api.put(`/orders/cancel/${id}`, data),
 

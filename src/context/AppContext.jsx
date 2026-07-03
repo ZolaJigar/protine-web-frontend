@@ -166,9 +166,16 @@ export function AppProvider({ children }) {
 
   // ── Cart helpers ──────────────────────────────────────────────────────────
   const addToCart = useCallback(async (productId, variantId, quantity = 1) => {
+    if (!productId) throw new Error('product_id is required');
+    if (!variantId) throw new Error('product_variant_id is required');
+
     const sessionId = getGuestSessionId();
     const res       = await cartAPI.addItem(
-      { product_id: productId, product_variant_id: variantId, quantity },
+      {
+        product_id:         Number(productId),
+        product_variant_id: Number(variantId),
+        quantity:           Number(quantity),
+      },
       sessionId,
     );
     const data = res.data?.data;

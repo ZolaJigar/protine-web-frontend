@@ -248,18 +248,16 @@ export default function ProductsPage() {
                   display: 'grid',
                   gridTemplateColumns: {
                     xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)',
-                    lg: 'repeat(4, 1fr)',
+                    md: 'repeat(2, 1fr)',
+                    xl: 'repeat(3, 1fr)',
                   },
-                  gap: 2.5,
+                  gap: 3,
                   width: '100%',
+                  alignItems: 'stretch',
                 }}
               >
                 {products.map((product) => (
-                  <Box key={product.id} sx={{ display: 'flex', minWidth: 0 }}>
-                    <ProductCard product={product} />
-                  </Box>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </Box>
             )}

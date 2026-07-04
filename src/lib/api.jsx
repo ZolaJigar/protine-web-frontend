@@ -133,22 +133,28 @@ export const authAPI = {
 // ─── PROFILE ─────────────────────────────────────────────────────────────────
 export const profileAPI = {
   /**
-   * GET /profile — returns the logged-in user's full profile.
+   * GET /users/profile — returns the logged-in user's full profile.
    * Token identifies the user; no :id in URL.
    */
-  get: () => api.get('/profile'),
+  get: () => api.get('/users/profile'),
 
   /**
-   * PUT /profile — update profile (multipart/form-data).
-   * Editable: name, phone, country_code, gender, dob, image (file).
-   * NOT editable: email, role_id, password.
+   * PUT /users/profile-update — update profile (multipart/form-data).
+   * Editable: name, phone, country_code, gender, date_of_birth, image (file, max 5MB).
+   * NOT editable: email.
    */
   update: (data) => {
     const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    return api.put('/profile', data, {
+    return api.put('/users/profile-update', data, {
       headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
     });
   },
+
+  /**
+   * POST /users/change-password — change password directly (no OTP needed).
+   * Body: { newPassword }
+   */
+  changePassword: (data) => api.post('/users/change-password', data),
 };
 
 // ─── USERS ───────────────────────────────────────────────────────────────────
@@ -260,6 +266,16 @@ export const cartAPI = {
     ),
 };
 
+// ─── LOCATIONS (countries / states / cities) ──────────────────────────────────
+export const locationsAPI = {
+  /** POST /countries/list — public, no auth */
+  listCountries: (body = {}) => api.post('/countries/list', body),
+  /** POST /states/list — public, filter by country_id */
+  listStates: (body = {}) => api.post('/states/list', body),
+  /** POST /cities/list — public, filter by state_id / country_id */
+  listCities: (body = {}) => api.post('/cities/list', body),
+};
+
 // ─── ADDRESSES ───────────────────────────────────────────────────────────────
 export const addressesAPI = {
   /** POST /addresses/list — body: { page, limit, user_id, address_type, is_default } (all optional) */
@@ -290,8 +306,8 @@ export const wishlistAPI = {
   /** GET /wishlist/list */
   getList: () => api.get('/wishlist/list'),
 
-  /** DELETE /wishlist/delete/:id  (:id = wishlist entry ID) */
-  removeItem: (id) => api.delete(`/wishlist/delete/${id}`),
+  /** DELETE /wishlist/remove-item/:id  (:id = wishlist entry ID) */
+  removeItem: (id) => api.delete(`/wishlist/remove-item/${id}`),
 
   /** DELETE /wishlist/clear */
   clear: () => api.delete('/wishlist/clear'),
@@ -312,6 +328,14 @@ export const couponsAPI = {
    * Requires auth.
    */
   validate: (data) => api.post('/coupons/validate', data),
+
+  /**
+   * POST /coupons/apply — apply a coupon to an order (records usage).
+   * Body: { coupon_code, order_amount }
+   * Response: { coupon_id, coupon_code, discount_type, discount_amount, original_amount, final_amount }
+   * Requires auth.
+   */
+  apply: (data) => api.post('/coupons/apply', data),
 };
 
 // ─── ORDERS ──────────────────────────────────────────────────────────────────
@@ -368,6 +392,13 @@ export const ordersAPI = {
    */
   downloadInvoice: (id) =>
     api.get(`/orders/invoice/download/${id}`, { responseType: 'blob' }),
+
+  /**
+   * Get order dashboard stats for the logged-in user.
+   * GET /orders/dashboard
+   * Returns: { totalOrders, ... }
+   */
+  dashboard: () => api.get('/orders/dashboard'),
 };
 
 // ─── PAYMENTS ────────────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import {
   ShoppingCart, Search, Menu as MenuIcon, Close, AccountCircle,
-  Favorite, LocalShipping, Support, Category, Home, Logout, Person, Receipt,
+  Favorite, LocalShipping, Support, Category, Home, Logout, Person,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { useApp } from '@/context/AppContext';
@@ -184,9 +184,6 @@ export default function Navbar() {
                 </MenuItem>,
                 <MenuItem key="orders" component={Link} href="/orders" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#D8F3DC' } }}>
                   <LocalShipping fontSize="small" sx={{ color: '#1B4332' }} /> My Orders
-                </MenuItem>,
-                <MenuItem key="invoices" component={Link} href="/invoices" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#D8F3DC' } }}>
-                  <Receipt fontSize="small" sx={{ color: '#1B4332' }} /> Invoices
                 </MenuItem>,
                 <Divider key="div" />,
                 <MenuItem key="logout" onClick={handleLogout} sx={{ py: 1.25, gap: 1.5, color: '#B91C1C', '&:hover': { bgcolor: '#FEE2E2' } }}>

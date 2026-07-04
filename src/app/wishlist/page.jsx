@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   Box, Container, Typography, Button, Card, CardMedia, CardContent,
   CardActions, IconButton, Chip, Skeleton, Alert, Tooltip, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from '@mui/material';
 import {
   Favorite, FavoriteOutlined, ShoppingBag, Delete, ShoppingCart,
@@ -253,6 +254,7 @@ export default function WishlistPage() {
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState(null);
   const [clearing, setClearing] = useState(false);
+  const [clearDialog, setClearDialog] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
     // Guard: only fetch if the user has a valid token
@@ -297,12 +299,12 @@ export default function WishlistPage() {
   };
 
   const handleClearAll = async () => {
-    if (!confirm('Remove all items from your wishlist?')) return;
     setClearing(true);
+    setClearDialog(false);
     try {
       await wishlistAPI.clear();
       setItems([]);
-      fetchWishlistCount(); // reset badge to 0
+      fetchWishlistCount();
       toast.success('Wishlist cleared.');
     } catch {
       toast.error('Could not clear wishlist.');
@@ -379,7 +381,7 @@ export default function WishlistPage() {
               <Button
                 variant="outlined"
                 startIcon={clearing ? <CircularProgress size={16} color="inherit" /> : <DeleteSweep />}
-                onClick={handleClearAll}
+                onClick={() => setClearDialog(true)}
                 disabled={clearing}
                 sx={{
                   color: '#FFF8F0', borderColor: 'rgba(255,248,240,0.4)',
@@ -465,6 +467,26 @@ export default function WishlistPage() {
           </Box>
         )}
       </Container>
+
+      {/* Clear All Confirmation Dialog */}
+      <Dialog open={clearDialog} onClose={() => setClearDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Clear Wishlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove all <strong>{items.length}</strong> item{items.length !== 1 ? 's' : ''} from your wishlist? This cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button onClick={() => setClearDialog(false)} disabled={clearing}>Cancel</Button>
+          <Button
+            variant="contained" color="error"
+            onClick={handleClearAll} disabled={clearing}
+            startIcon={clearing ? <CircularProgress size={16} color="inherit" /> : <DeleteSweep />}
+          >
+            {clearing ? 'Clearing…' : 'Clear All'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MainLayout>
   );
 }

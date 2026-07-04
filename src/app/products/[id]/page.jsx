@@ -3,18 +3,41 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  Box, Container, Typography, Button, Rating, Chip, Divider,
-  Tabs, Tab, Paper, Avatar, CircularProgress, Alert, Grid,
+  Box, Container, Typography, Button, Chip, Divider,
+  CircularProgress, Alert, IconButton, Paper,
 } from '@mui/material';
 import {
   ShoppingCart, Favorite, FavoriteBorder, LocalShipping, Security,
-  Add, Remove, Inventory2,
+  Add, Remove, ArrowBackIos, ArrowForwardIos,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
 import { useApp } from '@/context/AppContext';
 import { formatCurrency } from '@/lib/functions';
 import { productsAPI, variantsAPI, wishlistAPI } from '@/lib/api';
+
+// ─── Small helper: a labeled row like "SKU  CLAS-HI-1KG" ─────────────────────
+function InfoRow({ label, value }) {
+  if (!value && value !== 0) return null;
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px solid #F1F5F9' }}>
+      <Typography sx={{ fontSize: 13, color: '#64748B' }}>{label}</Typography>
+      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1C1917', textAlign: 'right', maxWidth: '60%' }}>{value}</Typography>
+    </Box>
+  );
+}
+
+// ─── Section wrapper ──────────────────────────────────────────────────────────
+function Section({ title, children }) {
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.8, mb: 1.5 }}>
+        {title}
+      </Typography>
+      {children}
+    </Box>
+  );
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -24,49 +47,47 @@ export default function ProductDetailPage() {
   const [variants,        setVariants]        = useState([]);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [qty,             setQty]             = useState(1);
-  const [tabValue,        setTabValue]        = useState('description');
   const [loading,         setLoading]         = useState(true);
   const [error,           setError]           = useState(null);
   const [addingToCart,    setAddingToCart]    = useState(false);
   const [isWishlisted,    setIsWishlisted]    = useState(false);
-  const [wishlistItemId,  setWishlistItemId]  = useState(null); // server id for removal
+  const [wishlistItemId,  setWishlistItemId]  = useState(null);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [imgIndex,        setImgIndex]        = useState(0);
 
-  // ── Fetch product + variants in parallel ──────────────────────────────────
+  // Reset image to first when variant changes
+  useEffect(() => { setImgIndex(0); }, [selectedVariant?.id]);
+
+  // ── Fetch product + variants ───────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
-
     Promise.all([
       productsAPI.getById(id),
       variantsAPI.getByProduct({ product_id: Number(id), page: 1, limit: 50 }),
     ])
       .then(([prodRes, varRes]) => {
-        const prod     = prodRes.data?.data ?? prodRes.data;
-        const varList  = varRes.data?.data?.data ?? [];
+        const prod    = prodRes.data?.data ?? prodRes.data;
+        const varList = varRes.data?.data?.data ?? [];
         setProduct(prod);
         setVariants(varList);
         if (varList.length > 0) setSelectedVariant(varList[0]);
       })
-      .catch((err) => {
-        console.error('Product detail fetch error:', err);
-        setError(err?.response?.data?.message || err?.message || 'Failed to load product.');
-      })
+      .catch((err) => setError(err?.response?.data?.message || err?.message || 'Failed to load product.'))
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Check if this product is already in the wishlist (logged-in only)
+  // ── Wishlist check ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!id || !state.isAuthenticated) return;
     wishlistAPI.getList()
       .then((res) => {
-        const list  = res.data?.data?.data ?? [];
-        const match = list.find((w) => w.product_id === Number(id));
+        const match = (res.data?.data?.data ?? []).find((w) => w.product_id === Number(id));
         if (match) { setIsWishlisted(true); setWishlistItemId(match.id); }
         else        { setIsWishlisted(false); setWishlistItemId(null); }
       })
-      .catch(() => {}); // silently ignore — heart just stays hollow
+      .catch(() => {});
   }, [id, state.isAuthenticated]);
 
   if (loading) {
@@ -89,62 +110,50 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Derive display values from selected variant (or product fallback)
-  const displayImage    = selectedVariant?.image || product.images?.[0]?.image || null;
-  const displayMrp      = selectedVariant ? parseFloat(selectedVariant.mrp) : null;
-  const displayPrice    = selectedVariant ? parseFloat(selectedVariant.selling_price) : null;
-  const displayStock    = selectedVariant?.quantity ?? 0;
-  const displaySku      = selectedVariant?.sku ?? '—';
-  const displayWeight   = selectedVariant ? `${selectedVariant.weight} ${selectedVariant.weight_unit}` : null;
-  const hasDiscount     = displayMrp && displayPrice && displayPrice < displayMrp;
-  const discountPct     = hasDiscount ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : 0;
-  const categoryName    = product.category?.name ?? '';
+  // ── Derived values ─────────────────────────────────────────────────────────
+  const allImages = [
+    ...(selectedVariant?.image ? [selectedVariant.image] : []),
+    ...(product.images ?? []).map((i) => i.image).filter(Boolean),
+  ];
+  const imageList   = [...new Set(allImages)];
+  const displayMrp   = selectedVariant ? parseFloat(selectedVariant.mrp)            : null;
+  const displayPrice = selectedVariant ? parseFloat(selectedVariant.selling_price)  : null;
+  const displayStock = selectedVariant?.quantity ?? (selectedVariant?.is_active ? 1 : 0);
+  const hasDiscount  = displayMrp && displayPrice && displayPrice < displayMrp;
+  const discountPct  = hasDiscount ? Math.round(((displayMrp - displayPrice) / displayMrp) * 100) : 0;
+  const inStock      = displayStock > 0;
 
+  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleAddToCart = async () => {
-    if (!selectedVariant) {
-      toast.warning('Please select a variant first.');
-      return;
-    }
+    if (!selectedVariant) { toast.warning('Please select a variant first.'); return; }
     setAddingToCart(true);
     const toastId = toast.loading('Adding to cart…');
     try {
       await addToCart(product.id, selectedVariant.id, qty);
-      toast.update(toastId, {
-        render: `🛒 ${qty} × ${selectedVariant.name} added to cart!`,
-        type: 'success', isLoading: false, autoClose: 2500,
-      });
+      toast.update(toastId, { render: `🛒 ${qty} × ${selectedVariant.name} added!`, type: 'success', isLoading: false, autoClose: 2500 });
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Could not add to cart. Please try again.';
-      toast.update(toastId, { render: msg, type: 'error', isLoading: false, autoClose: 3000 });
+      toast.update(toastId, { render: err?.response?.data?.message || 'Could not add to cart.', type: 'error', isLoading: false, autoClose: 3000 });
     } finally {
       setAddingToCart(false);
     }
   };
 
   const handleWishlist = async () => {
-    if (!state.isAuthenticated) {
-      toast.info('Please log in to save items to your wishlist.');
-      return;
-    }
+    if (!state.isAuthenticated) { toast.info('Please log in to save items to your wishlist.'); return; }
     setWishlistLoading(true);
     try {
       if (isWishlisted && wishlistItemId) {
         await wishlistAPI.removeItem(wishlistItemId);
-        setIsWishlisted(false);
-        setWishlistItemId(null);
+        setIsWishlisted(false); setWishlistItemId(null);
         toast.info('💔 Removed from wishlist', { autoClose: 2000 });
       } else {
-        const variantId = selectedVariant?.id ?? null;
-        const res       = await wishlistAPI.addItem({ product_id: Number(id), product_variant_id: variantId });
-        const newId     = res.data?.data?.id ?? null;
-        setIsWishlisted(true);
-        setWishlistItemId(newId);
+        const res  = await wishlistAPI.addItem({ product_id: Number(id), product_variant_id: selectedVariant?.id ?? null });
+        setIsWishlisted(true); setWishlistItemId(res.data?.data?.id ?? null);
         toast.success('❤️ Added to wishlist!', { autoClose: 2000 });
       }
-      fetchWishlistCount(); // keep navbar badge in sync
+      fetchWishlistCount();
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Could not update wishlist.';
-      toast.error(msg, { autoClose: 3000 });
+      toast.error(err?.response?.data?.message || 'Could not update wishlist.', { autoClose: 3000 });
     } finally {
       setWishlistLoading(false);
     }
@@ -152,326 +161,266 @@ export default function ProductDetailPage() {
 
   return (
     <MainLayout>
-      <Container maxWidth="xl" sx={{ py: 5 }}>
-        <Grid container spacing={4}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '420px 1fr' }, gap: 4, alignItems: 'start' }}>
 
-          {/* ── Left: image ── */}
-          <Grid size={{ xs: 12, md: 5 }}>
+          {/* ── LEFT: image carousel ──────────────────────────────────────── */}
+          <Box sx={{ position: { md: 'sticky' }, top: { md: 88 } }}>
             <Paper
               sx={{
-                borderRadius: 4, overflow: 'hidden',
-                position: 'sticky', top: 88,
-                boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
+                borderRadius: 3,
+                overflow: 'hidden',
+                bgcolor: '#fff',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+                border: '1px solid #E2E8F0',
               }}
             >
-              {displayImage ? (
-                <Box
-                  component="img"
-                  src={displayImage}
-                  alt={product.name}
-                  sx={{ width: '100%', height: 400, objectFit: 'cover' }}
-                />
-              ) : (
+              {/* Main image */}
+              <Box sx={{ position: 'relative', bgcolor: '#F8FAFC' }}>
+                {imageList.length > 0 ? (
+                  <img
+                    key={imageList[imgIndex]}
+                    src={imageList[imgIndex]}
+                    alt={`${product.name} ${imgIndex + 1}`}
+                    style={{
+                      width: '100%', height: 380,
+                      objectFit: 'contain', display: 'block',
+                      padding: '24px', background: '#F8FAFC',
+                    }}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <Box sx={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 96, bgcolor: '#F8FAFC' }}
+                    role="img" aria-label={product.name}>🛍️</Box>
+                )}
+
+                {/* Prev / Next over main image */}
+                {imageList.length > 1 && (
+                  <>
+                    <IconButton
+                      onClick={() => setImgIndex((i) => (i - 1 + imageList.length) % imageList.length)}
+                      aria-label="Previous image"
+                      size="small"
+                      sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.92)', border: '1px solid #E2E8F0', boxShadow: 1, '&:hover': { bgcolor: '#fff' } }}
+                    >
+                      <ArrowBackIos sx={{ fontSize: 14, ml: 0.5 }} />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => setImgIndex((i) => (i + 1) % imageList.length)}
+                      aria-label="Next image"
+                      size="small"
+                      sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.92)', border: '1px solid #E2E8F0', boxShadow: 1, '&:hover': { bgcolor: '#fff' } }}
+                    >
+                      <ArrowForwardIos sx={{ fontSize: 14 }} />
+                    </IconButton>
+
+                    {/* Counter */}
+                    <Box sx={{ position: 'absolute', bottom: 10, right: 12, bgcolor: 'rgba(0,0,0,0.38)', color: '#fff', px: 1.25, py: 0.2, borderRadius: '50px', fontSize: 11, fontWeight: 700 }}>
+                      {imgIndex + 1}/{imageList.length}
+                    </Box>
+                  </>
+                )}
+              </Box>
+
+              {/* Thumbnail strip — same style as reference: inside the card, bottom, with side arrows */}
+              {imageList.length > 1 && (
                 <Box
                   sx={{
-                    height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #D8F3DC, #B7E4C7)',
-                    fontSize: 100,
+                    display: 'flex', alignItems: 'center',
+                    borderTop: '1px solid #F1F5F9',
+                    px: 1, py: 1.25, gap: 0.75, bgcolor: '#fff',
                   }}
-                  role="img" aria-label={product.name}
                 >
-                  🛍️
+                  <IconButton size="small" onClick={() => setImgIndex((i) => (i - 1 + imageList.length) % imageList.length)}
+                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#1B4332' } }}>
+                    <ArrowBackIos sx={{ fontSize: 13, ml: 0.5 }} />
+                  </IconButton>
+
+                  <Box sx={{ display: 'flex', gap: 0.75, flex: 1, overflow: 'hidden', justifyContent: 'center' }}>
+                    {imageList.map((src, i) => (
+                      <Box
+                        key={i}
+                        onClick={() => setImgIndex(i)}
+                        sx={{
+                          width: 56, height: 56, flexShrink: 0, borderRadius: 1.5, overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: '2px solid',
+                          borderColor: i === imgIndex ? '#1B4332' : '#E2E8F0',
+                          opacity: i === imgIndex ? 1 : 0.6,
+                          transition: 'all 0.15s',
+                          '&:hover': { opacity: 1, borderColor: '#1B4332' },
+                        }}
+                      >
+                        <img src={src} alt={`Thumb ${i + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      </Box>
+                    ))}
+                  </Box>
+
+                  <IconButton size="small" onClick={() => setImgIndex((i) => (i + 1) % imageList.length)}
+                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#1B4332' } }}>
+                    <ArrowForwardIos sx={{ fontSize: 13 }} />
+                  </IconButton>
                 </Box>
               )}
             </Paper>
-          </Grid>
+          </Box>
 
-          {/* ── Right: details ── */}
-          <Grid size={{ xs: 12, md: 7 }}>
-            {categoryName && (
-              <Chip label={categoryName} size="small" color="primary" sx={{ mb: 1.5, fontWeight: 600 }} />
+          {/* ── RIGHT: product info ───────────────────────────────────────── */}
+          <Box>
+            {/* Category chips */}
+            {product.category?.name && (
+              <Chip label={product.category.name} size="small" color="primary" sx={{ mb: 1.5, fontWeight: 600, borderRadius: 1 }} />
             )}
 
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>{product.name}</Typography>
+            {/* Title */}
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1C1917', lineHeight: 1.2, mb: 0.75 }}>
+              {product.name}
+            </Typography>
 
+            {/* Short description */}
             {product.short_description && (
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.8 }}>
+              <Typography sx={{ fontSize: 14, color: '#64748B', mb: 2, lineHeight: 1.7 }}>
                 {product.short_description}
               </Typography>
             )}
 
-            {/* Stock status */}
-            <Box sx={{ mb: 2 }}>
-              {selectedVariant ? (
-                displayStock > 0
-                  ? <Chip icon={<Inventory2 fontSize="small" />} label={`${displayStock} in stock`} color="success" size="small" />
-                  : <Chip label="Out of Stock" color="error" size="small" />
-              ) : (
-                <Chip label="Select a variant" color="warning" size="small" />
-              )}
-            </Box>
-
-            {/* Price */}
-            {displayPrice !== null && (
-              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, mb: 3 }}>
-                <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.dark' }}>
+            {/* Price + stock */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 0.5 }}>
+              {displayPrice !== null && (
+                <Typography sx={{ fontSize: 32, fontWeight: 900, color: '#1B4332', lineHeight: 1 }}>
                   {formatCurrency(displayPrice)}
                 </Typography>
-                {hasDiscount && (
-                  <>
-                    <Typography variant="h6" sx={{ color: 'text.secondary', textDecoration: 'line-through' }}>
-                      {formatCurrency(displayMrp)}
-                    </Typography>
-                    <Chip label={`${discountPct}% OFF`} color="error" size="small" sx={{ fontWeight: 700 }} />
-                  </>
-                )}
-              </Box>
+              )}
+              {hasDiscount && (
+                <>
+                  <Typography sx={{ fontSize: 18, color: '#94A3B8', textDecoration: 'line-through' }}>
+                    {formatCurrency(displayMrp)}
+                  </Typography>
+                  <Chip label={`${discountPct}% OFF`} color="error" size="small" sx={{ fontWeight: 700 }} />
+                </>
+              )}
+            </Box>
+            {selectedVariant && (
+              <Chip
+                label={inStock ? 'In Stock' : 'Out of Stock'}
+                color={inStock ? 'success' : 'error'}
+                size="small"
+                sx={{ mb: 2.5, fontWeight: 600 }}
+              />
             )}
 
             <Divider sx={{ mb: 3 }} />
 
             {/* ── Variant selector ── */}
             {variants.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>
-                  Select Variant
-                  {selectedVariant && (
-                    <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1, fontWeight: 400 }}>
-                      — {selectedVariant.name}
-                    </Typography>
-                  )}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {variants.map((v) => (
-                    <Chip
-                      key={v.id}
-                      label={v.name}
-                      onClick={() => { setSelectedVariant(v); setQty(1); }}
-                      variant={selectedVariant?.id === v.id ? 'filled' : 'outlined'}
-                      color={selectedVariant?.id === v.id ? 'primary' : 'default'}
-                      disabled={!v.is_active || v.quantity === 0}
-                      sx={{
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        opacity: v.quantity === 0 ? 0.5 : 1,
-                      }}
-                    />
-                  ))}
+              <Section title="Select Variant">
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: selectedVariant ? 1.5 : 0 }}>
+                  {variants.map((v) => {
+                    const avail = v.is_active && (v.quantity === undefined || v.quantity > 0);
+                    return (
+                      <Chip
+                        key={v.id}
+                        label={v.name}
+                        onClick={() => { if (avail) { setSelectedVariant(v); setQty(1); } }}
+                        variant={selectedVariant?.id === v.id ? 'filled' : 'outlined'}
+                        color={selectedVariant?.id === v.id ? 'primary' : 'default'}
+                        disabled={!avail}
+                        sx={{ fontWeight: 600, cursor: avail ? 'pointer' : 'not-allowed', opacity: avail ? 1 : 0.45 }}
+                      />
+                    );
+                  })}
                 </Box>
-                {/* SKU + weight info */}
-                {selectedVariant && (
-                  <Box sx={{ mt: 1.5, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                    <Typography variant="caption" color="text.secondary">SKU: <strong>{displaySku}</strong></Typography>
-                    {displayWeight && (
-                      <Typography variant="caption" color="text.secondary">Weight: <strong>{displayWeight}</strong></Typography>
-                    )}
-                  </Box>
+              </Section>
+            )}
+
+            {/* ── Selected variant details ── */}
+            {selectedVariant && (
+              <Section title="Variant Details">
+                <InfoRow label="SKU"    value={selectedVariant.sku || null} />
+                <InfoRow label="Weight" value={selectedVariant.weight ? `${selectedVariant.weight} ${selectedVariant.weight_unit}` : null} />
+                <InfoRow label="Barcode" value={selectedVariant.barcode || null} />
+                {selectedVariant.quantity !== undefined && (
+                  <InfoRow label="Stock" value={selectedVariant.quantity} />
                 )}
-              </Box>
+              </Section>
             )}
 
             {/* ── Qty + actions ── */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-              <Box sx={{
-                display: 'flex', alignItems: 'center',
-                border: '2px solid', borderColor: 'primary.main',
-                borderRadius: '50px', overflow: 'hidden',
-              }}>
-                <Button onClick={() => setQty(Math.max(1, qty - 1))} sx={{ minWidth: 44, borderRadius: 0 }} aria-label="Decrease quantity">
-                  <Remove />
-                </Button>
-                <Typography sx={{ px: 2, fontWeight: 700, minWidth: 32, textAlign: 'center' }}>{qty}</Typography>
-                <Button
-                  onClick={() => setQty(Math.min(displayStock || 99, qty + 1))}
-                  sx={{ minWidth: 44, borderRadius: 0 }}
-                  aria-label="Increase quantity"
-                >
-                  <Add />
-                </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', border: '1.5px solid #1B4332', borderRadius: '50px', overflow: 'hidden' }}>
+                <IconButton size="small" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label="Decrease" sx={{ borderRadius: 0, px: 1.5 }}>
+                  <Remove fontSize="small" />
+                </IconButton>
+                <Typography sx={{ px: 1.5, fontWeight: 700, minWidth: 28, textAlign: 'center', fontSize: 15 }}>{qty}</Typography>
+                <IconButton size="small" onClick={() => setQty((q) => Math.min(displayStock || 99, q + 1))} aria-label="Increase" sx={{ borderRadius: 0, px: 1.5 }}>
+                  <Add fontSize="small" />
+                </IconButton>
               </Box>
 
               <Button
                 variant="contained" size="large"
-                startIcon={addingToCart ? <CircularProgress size={20} color="inherit" /> : <ShoppingCart />}
+                startIcon={addingToCart ? <CircularProgress size={18} color="inherit" /> : <ShoppingCart />}
                 onClick={handleAddToCart}
-                disabled={!selectedVariant || displayStock === 0 || addingToCart}
-                sx={{ flex: 1, background: 'linear-gradient(135deg, #2E7D32, #4CAF50)', py: 1.5 }}
+                disabled={!selectedVariant || !inStock || addingToCart}
+                sx={{
+                  flex: 1, fontWeight: 700, borderRadius: '50px', textTransform: 'none', fontSize: 15,
+                  background: 'linear-gradient(135deg, #1B4332, #2D6A4F)',
+                  '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' },
+                  '&.Mui-disabled': { background: '#A8A29E', color: '#fff' },
+                }}
               >
-                {displayStock === 0 ? 'Out of Stock' : addingToCart ? 'Adding…' : 'Add to Cart'}
+                {!inStock ? 'Out of Stock' : addingToCart ? 'Adding…' : 'Add to Cart'}
               </Button>
 
-              <Button
-                variant="outlined" size="large"
+              <IconButton
                 onClick={handleWishlist}
                 disabled={wishlistLoading}
                 aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-                sx={{ minWidth: 52 }}
+                sx={{ border: '1.5px solid #E2E8F0', borderRadius: '50%', p: 1.25 }}
               >
                 {wishlistLoading
-                  ? <CircularProgress size={22} sx={{ color: '#EF4444' }} />
-                  : isWishlisted
-                    ? <Favorite color="error" />
-                    : <FavoriteBorder />
-                }
-              </Button>
+                  ? <CircularProgress size={20} sx={{ color: '#EF4444' }} />
+                  : isWishlisted ? <Favorite sx={{ color: '#EF4444' }} /> : <FavoriteBorder />}
+              </IconButton>
             </Box>
 
-            {/* Trust badges */}
-            <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', p: 2.5, bgcolor: 'grey.50', borderRadius: 3 }}>
+            {/* ── Product info ── */}
+            <Section title="Product Info">
+              <InfoRow label="Product Name" value={product.name} />
+              <InfoRow label="Slug"         value={product.slug} />
+              <InfoRow label="Category"     value={product.category?.name} />
+              {product.starting_price !== undefined && (
+                <InfoRow label="Starting Price" value={formatCurrency(product.starting_price)} />
+              )}
+              {product.max_price !== undefined && product.max_price !== product.starting_price && (
+                <InfoRow label="Max Price" value={formatCurrency(product.max_price)} />
+              )}
+            </Section>
+
+            {/* ── Long description ── */}
+            {product.long_description && (
+              <Section title="Description">
+                <Typography sx={{ fontSize: 14, color: '#374151', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                  {product.long_description}
+                </Typography>
+              </Section>
+            )}
+
+            {/* ── Trust badges ── */}
+            <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap', mt: 1, pt: 2.5, borderTop: '1px solid #F1F5F9' }}>
               {[
                 { icon: <LocalShipping fontSize="small" />, text: 'Free delivery above ₹499' },
                 { icon: <Security fontSize="small" />,      text: 'Secure checkout' },
               ].map((item) => (
-                <Box key={item.text} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ color: 'primary.main' }}>{item.icon}</Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>{item.text}</Typography>
+                <Box key={item.text} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Box sx={{ color: '#1B4332' }}>{item.icon}</Box>
+                  <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>{item.text}</Typography>
                 </Box>
               ))}
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
 
-        {/* ── Tabs ── */}
-        <Box sx={{ mt: 6 }}>
-          <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ mb: 3 }}>
-            <Tab value="description" label="Description"                             sx={{ textTransform: 'none', fontWeight: 600 }} />
-            <Tab value="variants"    label={`Variants (${variants.length})`}         sx={{ textTransform: 'none', fontWeight: 600 }} />
-          </Tabs>
-
-          {/* Description */}
-          {tabValue === 'description' && (
-            <Paper sx={{ p: 3, borderRadius: 3 }}>
-              <Typography variant="body1" sx={{ lineHeight: 1.9, whiteSpace: 'pre-line' }}>
-                {product.long_description || product.short_description || 'No description available.'}
-              </Typography>
-            </Paper>
-          )}
-
-          {/* Variants cards */}
-          {tabValue === 'variants' && (
-            variants.length === 0 ? (
-              <Paper sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
-                <Typography color="text.secondary">No variants available.</Typography>
-              </Paper>
-            ) : (
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)',
-                    lg: 'repeat(4, 1fr)',
-                  },
-                  gap: 2,
-                }}
-              >
-                {variants.map((v) => {
-                  const price      = parseFloat(v.selling_price);
-                  const mrp        = parseFloat(v.mrp);
-                  const hasDisc    = mrp > price;
-                  const discPct    = hasDisc ? Math.round(((mrp - price) / mrp) * 100) : 0;
-                  const available  = v.is_active && v.quantity > 0;
-                  const isSelected = selectedVariant?.id === v.id;
-
-                  return (
-                    <Paper
-                      key={v.id}
-                      onClick={() => available && setSelectedVariant(v)}
-                      sx={{
-                        p: 2, borderRadius: 3,
-                        border: '2px solid',
-                        borderColor: isSelected ? '#1B4332' : '#E2E8F0',
-                        bgcolor: isSelected ? '#F0FDF4' : '#fff',
-                        cursor: available ? 'pointer' : 'not-allowed',
-                        opacity: available ? 1 : 0.55,
-                        transition: 'all 0.2s',
-                        '&:hover': available ? {
-                          borderColor: '#1B4332',
-                          boxShadow: '0 4px 16px rgba(27,67,50,0.12)',
-                          transform: 'translateY(-2px)',
-                        } : {},
-                        position: 'relative',
-                      }}
-                    >
-                      {/* Selected badge */}
-                      {isSelected && (
-                        <Chip
-                          label="Selected"
-                          size="small"
-                          sx={{
-                            position: 'absolute', top: 10, right: 10,
-                            bgcolor: '#1B4332', color: '#fff',
-                            fontWeight: 700, fontSize: 10, height: 20,
-                          }}
-                        />
-                      )}
-
-                      {/* Discount badge */}
-                      {hasDisc && available && (
-                        <Chip
-                          label={`${discPct}% OFF`}
-                          color="error"
-                          size="small"
-                          sx={{
-                            position: 'absolute', top: isSelected ? 34 : 10, right: 10,
-                            fontWeight: 700, fontSize: 10, height: 20,
-                          }}
-                        />
-                      )}
-
-                      {/* Name */}
-                      <Typography
-                        variant="subtitle2"
-                        fontWeight={700}
-                        sx={{ mb: 1.5, pr: 6, lineHeight: 1.3 }}
-                      >
-                        {v.name}
-                      </Typography>
-
-                      {/* Price row */}
-                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
-                        <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>
-                          {formatCurrency(price)}
-                        </Typography>
-                        {hasDisc && (
-                          <Typography
-                            variant="caption"
-                            sx={{ textDecoration: 'line-through', color: 'text.secondary' }}
-                          >
-                            {formatCurrency(mrp)}
-                          </Typography>
-                        )}
-                      </Box>
-
-                      {/* Meta row */}
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4, mb: 1.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          SKU: <strong>{v.sku ?? '—'}</strong>
-                        </Typography>
-                        {v.weight && (
-                          <Typography variant="caption" color="text.secondary">
-                            Weight: <strong>{v.weight} {v.weight_unit}</strong>
-                          </Typography>
-                        )}
-                        <Typography variant="caption" color="text.secondary">
-                          Stock: <strong>{v.quantity}</strong>
-                        </Typography>
-                      </Box>
-
-                      {/* Status chip */}
-                      <Chip
-                        label={available ? 'Available' : 'Unavailable'}
-                        color={available ? 'success' : 'error'}
-                        size="small"
-                        sx={{ fontWeight: 600, fontSize: 11 }}
-                      />
-                    </Paper>
-                  );
-                })}
-              </Box>
-            )
-          )}
         </Box>
       </Container>
     </MainLayout>

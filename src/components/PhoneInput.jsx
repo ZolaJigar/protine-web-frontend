@@ -118,6 +118,7 @@ export default function PhoneInput({
   dialCode = '91',
   onChange,
   error,
+  disabled = false,
 }) {
   const [open, setOpen] = useState(false);
   const anchorRef       = useRef(null);
@@ -141,6 +142,7 @@ export default function PhoneInput({
         value={value}
         onChange={handlePhoneChange}
         inputMode="tel"
+        disabled={disabled}
         placeholder={dialCode === '91' ? 'Enter your 10-digit number' : 'Enter your phone number'}
         label={label}
         sx={{
@@ -153,13 +155,14 @@ export default function PhoneInput({
           <InputAdornment position="start" sx={{ mr: 0 }}>
             <Box
               ref={anchorRef}
-              onClick={() => setOpen(true)}
+              onClick={() => !disabled && setOpen(true)}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 0.5,
-                cursor: 'pointer', userSelect: 'none',
+                cursor: disabled ? 'default' : 'pointer', userSelect: 'none',
                 py: 1.75, pl: 0, pr: 1.25, mr: 1.25,
                 borderRight: '1px solid #E2E8F0',
-                '&:hover': { opacity: 0.75 },
+                opacity: disabled ? 0.5 : 1,
+                '&:hover': { opacity: disabled ? 0.5 : 0.75 },
               }}
             >
               <FlagIcon iso={selected.iso} width={22} />

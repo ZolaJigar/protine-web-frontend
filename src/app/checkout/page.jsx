@@ -8,6 +8,7 @@ import {
   CircularProgress, Alert, Stepper, Step, StepLabel, Chip,
   TextField, Radio, FormControlLabel, IconButton, Skeleton,
   Dialog, DialogTitle, DialogContent, DialogActions,
+  MenuItem,
 } from '@mui/material';
 import {
   LocationOn, LocalOffer, CheckCircle, Add, Edit,
@@ -15,8 +16,9 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
+import PhoneInput from '@/components/PhoneInput';
 import { useApp } from '@/context/AppContext';
-import { addressesAPI, couponsAPI, ordersAPI } from '@/lib/api';
+import { addressesAPI, couponsAPI, ordersAPI, locationsAPI } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/functions';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -71,13 +73,55 @@ function AddressCard({ address, selected, onSelect }) {
 // ─── New Address Form ─────────────────────────────────────────────────────────
 function AddressForm({ userId, onSaved, onCancel }) {
   const [form, setForm] = useState({
-    name: '', mobile: '', email: '',
+    name: '', mobile: '', dialCode: '91', email: '',
     address_line_1: '', address_line_2: '', landmark: '',
-    postal_code: '', address_type: 'home', is_default: false,
+    postal_code: '', address_type: 'home',
     city_id: '', state_id: '', country_id: '',
   });
-  const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [errors,    setErrors]    = useState({});
+  const [saving,    setSaving]    = useState(false);
+
+  // Location cascades
+  const [countries,       setCountries]       = useState([]);
+  const [states,          setStates]          = useState([]);
+  const [cities,          setCities]          = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  const [loadingStates,    setLoadingStates]    = useState(false);
+  const [loadingCities,    setLoadingCities]    = useState(false);
+
+  // Load countries once
+  useEffect(() => {
+    locationsAPI.listCountries({ page: 1, limit: 100 })
+      .then((res) => setCountries(res.data?.data?.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingCountries(false));
+  }, []);
+
+  // Load states when country changes
+  useEffect(() => {
+    if (!form.country_id) { setStates([]); setCities([]); return; }
+    setLoadingStates(true);
+    setForm((p) => ({ ...p, state_id: '', city_id: '' }));
+    setStates([]); setCities([]);
+    locationsAPI.listStates({ country_id: Number(form.country_id), page: 1, limit: 200 })
+      .then((res) => setStates(res.data?.data?.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingStates(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.country_id]);
+
+  // Load cities when state changes
+  useEffect(() => {
+    if (!form.state_id) { setCities([]); return; }
+    setLoadingCities(true);
+    setForm((p) => ({ ...p, city_id: '' }));
+    setCities([]);
+    locationsAPI.listCities({ state_id: Number(form.state_id), country_id: Number(form.country_id) || undefined, page: 1, limit: 500 })
+      .then((res) => setCities(res.data?.data?.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingCities(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.state_id]);
 
   const field = (key) => ({
     value: form[key],
@@ -89,17 +133,29 @@ function AddressForm({ userId, onSaved, onCancel }) {
   });
 
   const handleSave = async () => {
+    // Basic client-side validation
+    const errs = {};
+    if (!form.name.trim())          errs.name           = 'Required';
+    if (!form.mobile.trim())        errs.mobile         = 'Required';
+    if (!form.address_line_1.trim()) errs.address_line_1 = 'Required';
+    if (!form.postal_code.trim())   errs.postal_code    = 'Required';
+    if (!form.country_id)           errs.country_id     = 'Required';
+    if (!form.state_id)             errs.state_id       = 'Required';
+    if (!form.city_id)              errs.city_id        = 'Required';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+
     setSaving(true);
     setErrors({});
     try {
       const payload = {
         ...form,
-        user_id: userId,
-        city_id: Number(form.city_id),
-        state_id: Number(form.state_id),
+        user_id:    userId,
+        mobile:     form.mobile, // backend just wants the number; dial code stored separately if needed
+        city_id:    Number(form.city_id),
+        state_id:   Number(form.state_id),
         country_id: Number(form.country_id),
-        is_default: form.is_default ? 1 : 0,
       };
+      delete payload.dialCode;
       const res = await addressesAPI.create(payload);
       onSaved(res.data?.data);
     } catch (err) {
@@ -118,18 +174,68 @@ function AddressForm({ userId, onSaved, onCancel }) {
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mt: 2 }}>
       <TextField label="Full Name *" {...field('name')} />
-      <TextField label="Mobile *" {...field('mobile')} inputProps={{ maxLength: 10 }} />
+      <PhoneInput
+        label="Mobile *"
+        value={form.mobile}
+        dialCode={form.dialCode}
+        onChange={(number, code) => setForm((p) => ({ ...p, mobile: number, dialCode: code }))}
+        error={errors.mobile || ''}
+      />
       <TextField label="Email" {...field('email')} sx={{ gridColumn: { sm: '1 / -1' } }} />
       <TextField label="Address Line 1 *" {...field('address_line_1')} sx={{ gridColumn: { sm: '1 / -1' } }} />
       <TextField label="Address Line 2" {...field('address_line_2')} sx={{ gridColumn: { sm: '1 / -1' } }} />
       <TextField label="Landmark" {...field('landmark')} sx={{ gridColumn: { sm: '1 / -1' } }} />
-      <TextField label="Postal Code *" {...field('postal_code')} inputProps={{ maxLength: 6 }} />
-      <TextField label="Address Type" {...field('address_type')} select SelectProps={{ native: true }}>
-        {['home', 'work', 'other'].map((t) => <option key={t} value={t}>{t}</option>)}
+      <TextField label="Postal Code *" {...field('postal_code')} slotProps={{ htmlInput: { maxLength: 6 } }} />
+      <TextField label="Address Type" {...field('address_type')} select size="small" fullWidth>
+        {['home', 'work', 'other'].map((t) => <MenuItem key={t} value={t} sx={{ textTransform: 'capitalize' }}>{t}</MenuItem>)}
       </TextField>
-      <TextField label="City ID *" {...field('city_id')} type="number" />
-      <TextField label="State ID *" {...field('state_id')} type="number" />
-      <TextField label="Country ID *" {...field('country_id')} type="number" />
+
+      {/* Country */}
+      <TextField
+        label="Country *" select size="small" fullWidth
+        value={form.country_id} onChange={(e) => setForm((p) => ({ ...p, country_id: e.target.value }))}
+        error={!!errors.country_id} helperText={errors.country_id || ''}
+        disabled={loadingCountries}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        {loadingCountries
+          ? <MenuItem disabled>Loading…</MenuItem>
+          : countries.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)
+        }
+      </TextField>
+
+      {/* State */}
+      <TextField
+        label="State *" select size="small" fullWidth
+        value={form.state_id} onChange={(e) => setForm((p) => ({ ...p, state_id: e.target.value }))}
+        error={!!errors.state_id} helperText={errors.state_id || ''}
+        disabled={!form.country_id || loadingStates}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        {loadingStates
+          ? <MenuItem disabled>Loading…</MenuItem>
+          : states.length === 0
+            ? <MenuItem disabled>{form.country_id ? 'No states found' : 'Select country first'}</MenuItem>
+            : states.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)
+        }
+      </TextField>
+
+      {/* City */}
+      <TextField
+        label="City *" select size="small" fullWidth
+        value={form.city_id} onChange={(e) => setForm((p) => ({ ...p, city_id: e.target.value }))}
+        error={!!errors.city_id} helperText={errors.city_id || ''}
+        disabled={!form.state_id || loadingCities}
+        slotProps={{ inputLabel: { shrink: true } }}
+      >
+        {loadingCities
+          ? <MenuItem disabled>Loading…</MenuItem>
+          : cities.length === 0
+            ? <MenuItem disabled>{form.state_id ? 'No cities found' : 'Select state first'}</MenuItem>
+            : cities.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)
+        }
+      </TextField>
+
       <Box sx={{ gridColumn: { sm: '1 / -1' }, display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 1 }}>
         <Button onClick={onCancel} variant="text" disabled={saving}>Cancel</Button>
         <Button onClick={handleSave} variant="contained" disabled={saving}
@@ -329,7 +435,7 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
     setValidating(true);
     setError('');
     try {
-      const res = await couponsAPI.validate({ coupon_code: trimmed, order_amount: subtotal });
+      const res = await couponsAPI.apply({ coupon_code: trimmed, order_amount: subtotal });
       onApply(res.data?.data);
       toast.success(`Coupon "${trimmed}" applied! You saved ${fmt(res.data?.data?.discount_amount)}`);
       setShowList(false);
@@ -368,7 +474,7 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
               value={code} onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
               error={!!error} helperText={error}
               onKeyDown={(e) => e.key === 'Enter' && handleApply()}
-              inputProps={{ style: { textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 } }}
+              slotProps={{ htmlInput: { style: { textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 } } }}
             />
             <Button variant="contained" onClick={() => handleApply()} disabled={validating || !code.trim()}
               sx={{ px: 3, whiteSpace: 'nowrap', background: '#1B4332', '&:hover': { background: '#0D2B1F' } }}>
@@ -485,7 +591,7 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
         label="Order Notes (optional)" multiline rows={2} size="small" fullWidth
         placeholder="e.g. Leave at door, call before delivery…"
         value={notes} onChange={(e) => onNotesChange(e.target.value)}
-        inputProps={{ maxLength: 500 }}
+        slotProps={{ htmlInput: { maxLength: 500 } }}
         helperText={`${notes.length}/500`}
       />
     </Box>

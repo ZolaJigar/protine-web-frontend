@@ -73,13 +73,15 @@ function TrackingTimeline({ timeline, currentStatus }) {
         {timeline.map((step) => (
           <Step key={step.status} completed={step.isCompleted}>
             <StepLabel
-              StepIconComponent={() => (
-                <CustomStepIcon
-                  status={step.status}
-                  isCompleted={step.isCompleted}
-                  isCurrent={step.isCurrent}
-                />
-              )}
+              slots={{
+                stepIcon: () => (
+                  <CustomStepIcon
+                    status={step.status}
+                    isCompleted={step.isCompleted}
+                    isCurrent={step.isCurrent}
+                  />
+                ),
+              }}
             >
               <Typography variant="caption" fontWeight={step.isCurrent ? 700 : 500}
                 sx={{ color: step.isCurrent ? '#1B4332' : step.isCompleted ? '#374151' : '#9CA3AF' }}>

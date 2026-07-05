@@ -51,9 +51,9 @@ export default function Navbar() {
           position="sticky"
           elevation={0}
           sx={{
-            background: '#0F172A',
-            borderBottom: '3px solid #F59E0B',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+            background: '#FFFFFF',
+            borderBottom: '2px solid #D1FAE5',
+            boxShadow: '0 2px 12px rgba(22,163,74,0.10)',
           }}
         >
           <Toolbar sx={{ gap: 1, minHeight: { xs: 64, md: 76 } }}>
@@ -62,7 +62,7 @@ export default function Navbar() {
             <IconButton
               edge="start"
               onClick={() => setDrawerOpen(true)}
-              sx={{ display: { md: 'none' }, color: '#FFF8F0' }}
+              sx={{ display: { md: 'none' }, color: '#16A34A' }}
               aria-label="Open navigation menu"
             >
               <MenuIcon />
@@ -91,9 +91,9 @@ export default function Navbar() {
                 <Link key={link.href} href={link.href} style={{ textDecoration: 'none' }}>
                   <Box
                     sx={{
-                      color: 'rgba(255,248,240,0.88)', px: 2, py: 1, borderRadius: '50px',
+                      color: '#374151', px: 2, py: 1, borderRadius: '50px',
                       fontWeight: 600, fontSize: 14, transition: 'all 0.2s',
-                      '&:hover': { background: 'rgba(245,158,11,0.18)', color: '#F59E0B' },
+                      '&:hover': { background: '#F0FDF4', color: '#16A34A' },
                     }}
                   >
                     {link.label}
@@ -108,32 +108,32 @@ export default function Navbar() {
             <Box
               sx={{
                 display: { xs: 'none', md: 'flex' }, alignItems: 'center',
-                background: 'rgba(255,255,255,0.08)', borderRadius: '50px',
+                background: '#F0FDF4', borderRadius: '50px',
                 px: 2, py: 0.75, gap: 1, width: 220,
-                border: '1.5px solid rgba(255,248,240,0.15)',
+                border: '1.5px solid #D1FAE5',
                 transition: 'all 0.3s',
-                '&:focus-within': { width: 280, background: 'rgba(255,255,255,0.14)', border: '1.5px solid #F59E0B' },
+                '&:focus-within': { width: 280, background: '#DCFCE7', border: '1.5px solid #16A34A' },
               }}
             >
-              <Search sx={{ color: 'rgba(255,248,240,0.5)', fontSize: 20 }} />
+              <Search sx={{ color: '#4ADE80', fontSize: 20 }} />
               <InputBase
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ color: '#FFF8F0', fontSize: 14, '& input::placeholder': { color: 'rgba(255,248,240,0.4)' } }}
+                sx={{ color: '#111827', fontSize: 14, '& input::placeholder': { color: '#9CA3AF' } }}
                 inputProps={{ 'aria-label': 'Search products' }}
               />
             </Box>
 
             {/* Mobile search icon */}
-            <IconButton onClick={() => setSearchOpen(!searchOpen)} sx={{ display: { md: 'none' }, color: '#FFF8F0' }} aria-label="Search">
+            <IconButton onClick={() => setSearchOpen(!searchOpen)} sx={{ display: { md: 'none' }, color: '#16A34A' }} aria-label="Search">
               <Search />
             </IconButton>
 
             {/* Wishlist */}
             <Link href="/wishlist" style={{ textDecoration: 'none' }}>
-              <IconButton sx={{ color: '#FFF8F0' }} aria-label="Wishlist">
-                <Badge badgeContent={wishlistCount} sx={{ '& .MuiBadge-badge': { bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 700 } }}>
+              <IconButton sx={{ color: '#16A34A' }} aria-label="Wishlist">
+                <Badge badgeContent={wishlistCount} sx={{ '& .MuiBadge-badge': { bgcolor: '#FF6B35', color: '#FFFFFF', fontWeight: 700 } }}>
                   <Favorite />
                 </Badge>
               </IconButton>
@@ -141,8 +141,8 @@ export default function Navbar() {
 
             {/* Cart */}
             <Link href="/cart" style={{ textDecoration: 'none' }}>
-              <IconButton sx={{ color: '#FFF8F0' }} aria-label={`Cart, ${cartCount} items`}>
-                <Badge badgeContent={cartCount} sx={{ '& .MuiBadge-badge': { bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 700 } }}>
+              <IconButton sx={{ color: '#16A34A' }} aria-label={`Cart, ${cartCount} items`}>
+                <Badge badgeContent={cartCount} sx={{ '& .MuiBadge-badge': { bgcolor: '#FF6B35', color: '#FFFFFF', fontWeight: 700 } }}>
                   <ShoppingCart />
                 </Badge>
               </IconButton>
@@ -151,11 +151,11 @@ export default function Navbar() {
             {/* Account — always shows dropdown */}
             <IconButton onClick={handleAccountMenu} size="small" aria-label="Account menu">
               {state.isAuthenticated ? (
-                <Avatar sx={{ width: 36, height: 36, bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 800, fontSize: 14 }}>
+                <Avatar sx={{ width: 36, height: 36, bgcolor: '#16A34A', color: '#FFFFFF', fontWeight: 800, fontSize: 14 }}>
                   {getInitials(state.user?.name || 'U')}
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ color: '#FFF8F0', fontSize: 30 }} />
+                <AccountCircle sx={{ color: '#16A34A', fontSize: 30 }} />
               )}
             </IconButton>
 
@@ -176,14 +176,14 @@ export default function Navbar() {
               {state.isAuthenticated ? [
                 /* Logged-in header */
                 <Box key="info" sx={{ px: 2.5, py: 1.5, borderBottom: '1px solid #E7E5E4' }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>{state.user?.name}</Typography>
-                  <Typography variant="caption" sx={{ color: '#57534E' }}>{state.user?.email}</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#16A34A' }}>{state.user?.name}</Typography>
+                  <Typography variant="caption" sx={{ color: '#4B5563' }}>{state.user?.email}</Typography>
                 </Box>,
-                <MenuItem key="profile" component={Link} href="/profile" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#D8F3DC' } }}>
-                  <Person fontSize="small" sx={{ color: '#1B4332' }} /> My Profile
+                <MenuItem key="profile" component={Link} href="/profile" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#F0FDF4' } }}>
+                  <Person fontSize="small" sx={{ color: '#16A34A' }} /> My Profile
                 </MenuItem>,
-                <MenuItem key="orders" component={Link} href="/orders" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#D8F3DC' } }}>
-                  <LocalShipping fontSize="small" sx={{ color: '#1B4332' }} /> My Orders
+                <MenuItem key="orders" component={Link} href="/orders" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#F0FDF4' } }}>
+                  <LocalShipping fontSize="small" sx={{ color: '#16A34A' }} /> My Orders
                 </MenuItem>,
                 <Divider key="div" />,
                 <MenuItem key="logout" onClick={handleLogout} sx={{ py: 1.25, gap: 1.5, color: '#B91C1C', '&:hover': { bgcolor: '#FEE2E2' } }}>
@@ -192,22 +192,22 @@ export default function Navbar() {
               ] : [
                 /* Guest header */
                 <Box key="guest" sx={{ px: 2.5, py: 1.5, borderBottom: '1px solid #E7E5E4' }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>Welcome!</Typography>
-                  <Typography variant="caption" sx={{ color: '#57534E' }}>Sign in to your account</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#16A34A' }}>Welcome!</Typography>
+                  <Typography variant="caption" sx={{ color: '#4B5563' }}>Sign in to your account</Typography>
                 </Box>,
                 <Box key="btns" sx={{ px: 1.5, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <MenuItem component={Link} href="/login" onClick={handleAccountClose}
-                    sx={{ borderRadius: 2, bgcolor: '#1B4332', color: '#FFF8F0', fontWeight: 700, justifyContent: 'center', py: 1.25, '&:hover': { bgcolor: '#0D2B1F' } }}>
+                    sx={{ borderRadius: 2, bgcolor: '#16A34A', color: '#FFFFFF', fontWeight: 700, justifyContent: 'center', py: 1.25, '&:hover': { bgcolor: '#15803D' } }}>
                     Login
                   </MenuItem>
                   <MenuItem component={Link} href="/register" onClick={handleAccountClose}
-                    sx={{ borderRadius: 2, border: '1.5px solid #1B4332', color: '#1B4332', fontWeight: 700, justifyContent: 'center', py: 1.25, '&:hover': { bgcolor: '#D8F3DC' } }}>
+                    sx={{ borderRadius: 2, border: '1.5px solid #16A34A', color: '#16A34A', fontWeight: 700, justifyContent: 'center', py: 1.25, '&:hover': { bgcolor: '#F0FDF4' } }}>
                     Register
                   </MenuItem>
                 </Box>,
                 <Divider key="div" />,
-                <MenuItem key="support" component={Link} href="/support" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#D8F3DC' } }}>
-                  <Support fontSize="small" sx={{ color: '#1B4332' }} /> Support
+                <MenuItem key="support" component={Link} href="/support" onClick={handleAccountClose} sx={{ py: 1.25, gap: 1.5, '&:hover': { bgcolor: '#F0FDF4' } }}>
+                  <Support fontSize="small" sx={{ color: '#16A34A' }} /> Support
                 </MenuItem>,
               ]}
             </Menu>
@@ -218,13 +218,13 @@ export default function Navbar() {
             <Box sx={{ px: 2, pb: 1.5, display: { md: 'none' } }}>
               <Box sx={{
                 display: 'flex', alignItems: 'center',
-                background: 'rgba(255,255,255,0.1)', borderRadius: '50px',
-                px: 2, py: 0.75, gap: 1, border: '1.5px solid #F59E0B',
+                background: '#F0FDF4', borderRadius: '50px',
+                px: 2, py: 0.75, gap: 1, border: '1.5px solid #16A34A',
               }}>
-                <Search sx={{ color: 'rgba(255,248,240,0.6)', fontSize: 20 }} />
+                <Search sx={{ color: '#4ADE80', fontSize: 20 }} />
                 <InputBase autoFocus fullWidth placeholder="Search products..."
                   value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  sx={{ color: '#FFF8F0', fontSize: 14 }}
+                  sx={{ color: '#111827', fontSize: 14 }}
                   inputProps={{ 'aria-label': 'Search products' }}
                 />
               </Box>
@@ -235,15 +235,10 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 280, background: '#FFF8F0', minHeight: '100vh' }} role="navigation" aria-label="Mobile navigation">
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5, background: '#0F172A', borderBottom: '2px solid #F59E0B' }}>
-            <Box
-              component="img"
-              src="/logo_without_bg.png"
-              alt="Protine Web"
-              sx={{ height: 52, width: 52, objectFit: 'contain' }}
-            />
-            <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu" sx={{ color: '#FFF8F0' }}>
+        <Box sx={{ width: 280, background: '#FFFFFF', minHeight: '100vh' }} role="navigation" aria-label="Mobile navigation">
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5, background: '#F0FDF4', borderBottom: '2px solid #D1FAE5' }}>
+            <Box component="img" src="/logo_without_bg.png" alt="Protine Web" sx={{ height: 52, width: 52, objectFit: 'contain' }} />
+            <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu" sx={{ color: '#16A34A' }}>
               <Close />
             </IconButton>
           </Box>
@@ -254,10 +249,10 @@ export default function Navbar() {
                 <ListItemButton
                   component={Link} href={link.href}
                   onClick={() => setDrawerOpen(false)}
-                  sx={{ py: 1.5, gap: 2, '&:hover': { bgcolor: '#FEF3C7' } }}
+                  sx={{ py: 1.5, gap: 2, '&:hover': { bgcolor: '#F0FDF4' } }}
                 >
-                  <Box sx={{ color: '#1B4332' }}>{link.icon}</Box>
-                  <ListItemText primary={link.label} primaryTypographyProps={{ fontWeight: 600, color: '#1C1917' }} />
+                  <Box sx={{ color: '#16A34A' }}>{link.icon}</Box>
+                  <ListItemText primary={link.label} primaryTypographyProps={{ fontWeight: 600, color: '#111827' }} />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -268,8 +263,8 @@ export default function Navbar() {
           {state.isAuthenticated ? (
             <List>
               <ListItem disablePadding>
-                <ListItemButton component={Link} href="/profile" onClick={() => setDrawerOpen(false)} sx={{ '&:hover': { bgcolor: '#FEF3C7' } }}>
-                  <Person fontSize="small" sx={{ mr: 2, color: '#1B4332' }} />
+                <ListItemButton component={Link} href="/profile" onClick={() => setDrawerOpen(false)} sx={{ '&:hover': { bgcolor: '#F0FDF4' } }}>
+                  <Person fontSize="small" sx={{ mr: 2, color: '#16A34A' }} />
                   <ListItemText primary="My Profile" primaryTypographyProps={{ fontWeight: 600 }} />
                 </ListItemButton>
               </ListItem>
@@ -283,8 +278,8 @@ export default function Navbar() {
           ) : (
             <List>
               <ListItem disablePadding>
-                <ListItemButton component={Link} href="/login" onClick={() => setDrawerOpen(false)} sx={{ '&:hover': { bgcolor: '#FEF3C7' } }}>
-                  <AccountCircle fontSize="small" sx={{ mr: 2, color: '#1B4332' }} />
+                <ListItemButton component={Link} href="/login" onClick={() => setDrawerOpen(false)} sx={{ '&:hover': { bgcolor: '#F0FDF4' } }}>
+                  <AccountCircle fontSize="small" sx={{ mr: 2, color: '#16A34A' }} />
                   <ListItemText primary="Login / Register" primaryTypographyProps={{ fontWeight: 600 }} />
                 </ListItemButton>
               </ListItem>

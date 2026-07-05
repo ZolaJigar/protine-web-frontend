@@ -403,7 +403,7 @@ export default function AdminCreateUserPage() {
               disabled={loading}
               sx={{
                 flex: 1, py: 1.5, fontWeight: 700, fontSize: 15,
-                background: 'linear-gradient(135deg, #2E7D32, #4CAF50)',
+                background: 'linear-gradient(135deg, #4ADE80, #4ADE80)',
               }}
             >
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Create User'}

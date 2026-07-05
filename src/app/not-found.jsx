@@ -9,7 +9,7 @@ export default function NotFound() {
     <Box
       sx={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+        background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
         textAlign: 'center', px: 2,
       }}
     >
@@ -29,7 +29,7 @@ export default function NotFound() {
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button
             component={Link} href="/" variant="contained" size="large" startIcon={<Home />}
-            sx={{ bgcolor: '#fff', color: '#2E7D32', fontWeight: 700, '&:hover': { bgcolor: '#f5f5f5' } }}
+            sx={{ bgcolor: '#fff', color: '#4ADE80', fontWeight: 700, '&:hover': { bgcolor: '#f5f5f5' } }}
           >
             Go Home
           </Button>

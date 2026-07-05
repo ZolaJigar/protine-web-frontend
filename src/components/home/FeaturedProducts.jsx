@@ -36,10 +36,10 @@ export default function FeaturedProducts() {
         {/* Header row */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 5, flexWrap: 'wrap', gap: 2 }}>
           <Box>
-            <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 2 }}>
+            <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 2 }}>
               Top Picks
             </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 800, color: '#1B4332', mt: 0.5 }}>
+            <Typography variant="h3" sx={{ fontWeight: 800, color: '#16A34A', mt: 0.5 }}>
               Featured Products
             </Typography>
           </Box>
@@ -53,7 +53,7 @@ export default function FeaturedProducts() {
         {/* Loading */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-            <CircularProgress sx={{ color: '#1B4332' }} />
+            <CircularProgress sx={{ color: '#16A34A' }} />
           </Box>
         )}
 

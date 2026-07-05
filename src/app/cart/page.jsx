@@ -14,11 +14,11 @@ import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
 import { useApp } from '@/context/AppContext';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const fmt = (val) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(val) || 0);
 
-// ─── Cart Item Row ────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Cart Item Row ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function CartItem({ item, onUpdate, onRemove }) {
   const [qty, setQty]           = useState(item.quantity);
   const [updating, setUpdating] = useState(false);
@@ -84,7 +84,7 @@ function CartItem({ item, onUpdate, onRemove }) {
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         ) : (
-          <Typography sx={{ fontSize: 36 }} role="img" aria-label={item.product?.name}>🛍️</Typography>
+          <Typography sx={{ fontSize: 36 }} role="img" aria-label={item.product?.name}>≡ƒ¢ì∩╕Å</Typography>
         )}
       </Box>
 
@@ -116,7 +116,7 @@ function CartItem({ item, onUpdate, onRemove }) {
 
         {/* Pricing row */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1B4332' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#16A34A' }}>
             {fmt(item.unit_price)}
           </Typography>
           {item.productVariant?.mrp && Number(item.productVariant.mrp) > Number(item.unit_price) && (
@@ -174,7 +174,7 @@ function CartItem({ item, onUpdate, onRemove }) {
             {removing ? <CircularProgress size={18} color="inherit" /> : <Delete fontSize="small" />}
           </IconButton>
 
-          <Typography variant="body2" sx={{ fontWeight: 700, color: '#1B4332', ml: 'auto' }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, color: '#16A34A', ml: 'auto' }}>
             {fmt(item.total_price)}
           </Typography>
         </Box>
@@ -183,7 +183,7 @@ function CartItem({ item, onUpdate, onRemove }) {
   );
 }
 
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Loading skeleton ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function CartSkeleton() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -202,7 +202,7 @@ function CartSkeleton() {
   );
 }
 
-// ─── Empty cart ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Empty cart ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function EmptyCart() {
   return (
     <Box sx={{ textAlign: 'center', py: 10 }}>
@@ -219,8 +219,8 @@ function EmptyCart() {
         endIcon={<ArrowForward />}
         sx={{
           px: 5, py: 1.5, borderRadius: '50px', fontWeight: 700,
-          background: 'linear-gradient(135deg, #1B4332, #2D6A4F)',
-          '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' },
+          background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
+          '&:hover': { background: 'linear-gradient(135deg, #15803D, #16A34A)' },
         }}
       >
         Browse Products
@@ -229,7 +229,7 @@ function EmptyCart() {
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Main page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export default function CartPage() {
   const { state, fetchCart, updateCartItem, removeFromCart, clearCart } =
     useApp();
@@ -271,7 +271,7 @@ export default function CartPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <ShoppingCartOutlined sx={{ fontSize: 36 }} />
@@ -281,7 +281,7 @@ export default function CartPage() {
             {!loading && hasItems && (
               <Chip
                 label={`${summary.total_items} ${summary.total_items === 1 ? 'item' : 'items'}`}
-                sx={{ bgcolor: '#F59E0B', color: '#0F172A', fontWeight: 700 }}
+                sx={{ bgcolor: '#FF6B35', color: '#15803D', fontWeight: 700 }}
               />
             )}
           </Box>
@@ -320,7 +320,7 @@ export default function CartPage() {
               alignItems: 'start',
             }}
           >
-            {/* ── Left: items list ── */}
+            {/* ΓöÇΓöÇ Left: items list ΓöÇΓöÇ */}
             <Paper sx={{ borderRadius: 3, p: { xs: 2, sm: 3 } }}>
               {/* List header */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -353,7 +353,7 @@ export default function CartPage() {
               </Box>
             </Paper>
 
-            {/* ── Right: order summary ── */}
+            {/* ΓöÇΓöÇ Right: order summary ΓöÇΓöÇ */}
             <Paper
               sx={{
                 borderRadius: 3,
@@ -378,7 +378,7 @@ export default function CartPage() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography color="text.secondary">Discount</Typography>
                     <Typography fontWeight={600} color="success.main">
-                      − {fmt(summary.discount_amount)}
+                      ΓêÆ {fmt(summary.discount_amount)}
                     </Typography>
                   </Box>
                 )}
@@ -402,7 +402,7 @@ export default function CartPage() {
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="h6" fontWeight={700}>Total</Typography>
-                <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>
+                <Typography variant="h6" fontWeight={900} sx={{ color: '#16A34A' }}>
                   {fmt(summary.grand_total)}
                 </Typography>
               </Box>
@@ -416,9 +416,9 @@ export default function CartPage() {
                 endIcon={<ArrowForward />}
                 sx={{
                   py: 1.5, fontWeight: 700, borderRadius: '50px', textTransform: 'none', fontSize: 16,
-                  background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
-                  boxShadow: '0 4px 14px rgba(27,67,50,0.35)',
-                  '&:hover': { background: 'linear-gradient(135deg, #0D2B1F 0%, #1B4332 100%)' },
+                  background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)',
+                  boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+                  '&:hover': { background: 'linear-gradient(135deg, #15803D 0%, #16A34A 100%)' },
                 }}
               >
                 Proceed to Checkout
@@ -429,9 +429,9 @@ export default function CartPage() {
                 href="/products"
                 variant="text"
                 fullWidth
-                sx={{ mt: 1.5, color: '#57534E', fontWeight: 600, textTransform: 'none' }}
+                sx={{ mt: 1.5, color: '#4B5563', fontWeight: 600, textTransform: 'none' }}
               >
-                ← Continue Shopping
+                ΓåÉ Continue Shopping
               </Button>
             </Paper>
           </Box>

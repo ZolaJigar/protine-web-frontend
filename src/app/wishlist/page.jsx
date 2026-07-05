@@ -130,7 +130,7 @@ function WishlistCard({ item, onRemove, onAddToCart }) {
             height: 200,
             display: imgUrl ? 'none' : 'flex',
             alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #CCEFDB, #E8F5E9)',
+            background: 'linear-gradient(135deg, #F0FDF4, #F0FDF4)',
             fontSize: 64,
           }}
           role="img" aria-label={item.product?.name}
@@ -167,7 +167,7 @@ function WishlistCard({ item, onRemove, onAddToCart }) {
         {/* Price */}
         {price !== null && (
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mt: 1 }}>
-            <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>
+            <Typography variant="h6" fontWeight={900} sx={{ color: '#16A34A' }}>
               {fmt(price)}
             </Typography>
             {hasDisc && (
@@ -205,10 +205,10 @@ function WishlistCard({ item, onRemove, onAddToCart }) {
             borderRadius: '50px', fontWeight: 700,
             textTransform: 'none', fontSize: 13,
             background: inStock
-              ? 'linear-gradient(135deg, #1B4332, #2D6A4F)'
+              ? 'linear-gradient(135deg, #16A34A, #4ADE80)'
               : undefined,
             '&:hover': {
-              background: 'linear-gradient(135deg, #0D2B1F, #1B4332)',
+              background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
             },
             '&.Mui-disabled': { background: '#E2E8F0' },
           }}
@@ -361,8 +361,8 @@ export default function WishlistPage() {
       {/* Banner */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
-          py: 5, color: '#FFF8F0',
+          background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)',
+          py: 5, color: '#FFFFFF',
         }}
       >
         <Container maxWidth="xl">
@@ -384,7 +384,7 @@ export default function WishlistPage() {
                 onClick={() => setClearDialog(true)}
                 disabled={clearing}
                 sx={{
-                  color: '#FFF8F0', borderColor: 'rgba(255,248,240,0.4)',
+                  color: '#FFFFFF', borderColor: 'rgba(255,248,240,0.4)',
                   fontWeight: 600, borderRadius: '50px',
                   '&:hover': { borderColor: '#F87171', color: '#F87171', bgcolor: 'rgba(248,113,113,0.08)' },
                 }}
@@ -433,8 +433,8 @@ export default function WishlistPage() {
               startIcon={<ShoppingBag />}
               sx={{
                 px: 5, py: 1.5, borderRadius: '50px', fontWeight: 700,
-                background: 'linear-gradient(135deg, #1B4332, #2D6A4F)',
-                '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' },
+                background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
+                '&:hover': { background: 'linear-gradient(135deg, #15803D, #16A34A)' },
               }}
             >
               Browse Products

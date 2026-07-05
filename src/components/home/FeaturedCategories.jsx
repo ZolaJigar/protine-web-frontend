@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Box, Container, Typography, Card, CardContent,
@@ -11,11 +12,11 @@ import { categoriesAPI } from '@/lib/api';
 
 const PALETTE = [
   { color: '#B91C1C', bg: '#FEE2E2' },
-  { color: '#D97706', bg: '#FEF3C7' },
+  { color: '#E5501A', bg: '#FFF0EB' },
   { color: '#C2410C', bg: '#FFEDD5' },
-  { color: '#1B4332', bg: '#D8F3DC' },
-  { color: '#78350F', bg: '#FEF3C7' },
-  { color: '#2D6A4F', bg: '#D8F3DC' },
+  { color: '#16A34A', bg: '#F0FDF4' },
+  { color: '#78350F', bg: '#FFF0EB' },
+  { color: '#4ADE80', bg: '#F0FDF4' },
   { color: '#1E40AF', bg: '#DBEAFE' },
   { color: '#7C3AED', bg: '#EDE9FE' },
 ];
@@ -25,6 +26,7 @@ function getPalette(index) {
 }
 
 export default function FeaturedCategories() {
+  const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
@@ -44,17 +46,17 @@ export default function FeaturedCategories() {
   }, []);
 
   return (
-    <Box sx={{ py: 8, bgcolor: '#FFF8F0' }}>
+    <Box sx={{ py: 8, bgcolor: '#FFFFFF' }}>
       <Container maxWidth="xl">
         {/* Heading */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 2 }}>
+          <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 2 }}>
             Browse by Category
           </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 800, color: '#1B4332', mt: 1 }}>
+          <Typography variant="h3" sx={{ fontWeight: 800, color: '#16A34A', mt: 1 }}>
             Explore Our Range
           </Typography>
-          <Typography variant="body1" sx={{ color: '#57534E', mt: 1, maxWidth: 500, mx: 'auto' }}>
+          <Typography variant="body1" sx={{ color: '#4B5563', mt: 1, maxWidth: 500, mx: 'auto' }}>
             From classic ketchups to gourmet dressings — find exactly what you need.
           </Typography>
         </Box>
@@ -62,7 +64,7 @@ export default function FeaturedCategories() {
         {/* Loading */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-            <CircularProgress sx={{ color: '#1B4332' }} />
+            <CircularProgress sx={{ color: '#16A34A' }} />
           </Box>
         )}
 
@@ -88,22 +90,19 @@ export default function FeaturedCategories() {
             {categories.map((cat, index) => {
               const { color, bg } = getPalette(index);
               return (
-                <Link
+                <Card
                   key={cat.id}
-                  href={`/categories/${cat.slug}`}
-                  style={{ textDecoration: 'none', display: 'flex' }}
+                  className="card-3d"
+                  onClick={() => router.push(`/products?category_id=${cat.id}`)}
+                  sx={{
+                    width: '100%',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: '2px solid transparent',
+                    transition: 'all 0.3s',
+                    '&:hover': { border: `2px solid ${color}50` },
+                  }}
                 >
-                  <Card
-                    className="card-3d"
-                    sx={{
-                      width: '100%',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      border: '2px solid transparent',
-                      transition: 'all 0.3s',
-                      '&:hover': { border: `2px solid ${color}50` },
-                    }}
-                  >
                     <CardContent
                       sx={{
                         py: 3, px: 1,
@@ -139,7 +138,7 @@ export default function FeaturedCategories() {
                         )}
                       </Box>
 
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1917', mb: 0.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#111827', mb: 0.5 }}>
                         {cat.name}
                       </Typography>
 
@@ -150,7 +149,6 @@ export default function FeaturedCategories() {
                       )}
                     </CardContent>
                   </Card>
-                </Link>
               );
             })}
           </Box>
@@ -163,8 +161,8 @@ export default function FeaturedCategories() {
               <Box
                 sx={{
                   display: 'inline-flex', alignItems: 'center', gap: 1,
-                  color: '#1B4332', fontWeight: 700, fontSize: 16,
-                  '&:hover': { color: '#2D6A4F' },
+                  color: '#16A34A', fontWeight: 700, fontSize: 16,
+                  '&:hover': { color: '#4ADE80' },
                 }}
               >
                 View All Categories <ArrowForward fontSize="small" />

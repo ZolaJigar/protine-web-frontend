@@ -26,8 +26,8 @@ const ColorConnector = styled(StepConnector)(({ theme }) => ({
     borderColor: theme.palette.mode === 'dark' ? '#555' : '#E0E0E0',
     borderTopWidth: 3, borderRadius: 1,
   },
-  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: { borderColor: '#1B4332' },
-  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: { borderColor: '#1B4332' },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: { borderColor: '#16A34A' },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: { borderColor: '#16A34A' },
 }));
 
 const TRACKING_STEPS = ['pending', 'confirmed', 'processing', 'packed', 'shipped', 'delivered'];
@@ -42,13 +42,13 @@ const stepIcons = {
 };
 
 function CustomStepIcon({ status, isCompleted, isCurrent }) {
-  const bg = isCompleted || isCurrent ? '#1B4332' : '#CBD5E1';
+  const bg = isCompleted || isCurrent ? '#16A34A' : '#CBD5E1';
   return (
     <Box sx={{
       width: 44, height: 44, borderRadius: '50%',
       bgcolor: bg, color: '#fff',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      border: isCurrent ? '3px solid #F59E0B' : '3px solid transparent',
+      border: isCurrent ? '3px solid #FF6B35' : '3px solid transparent',
       boxShadow: isCurrent ? '0 0 0 3px rgba(245,158,11,0.25)' : 'none',
       transition: 'all 0.3s',
     }}>
@@ -84,7 +84,7 @@ function TrackingTimeline({ timeline, currentStatus }) {
               }}
             >
               <Typography variant="caption" fontWeight={step.isCurrent ? 700 : 500}
-                sx={{ color: step.isCurrent ? '#1B4332' : step.isCompleted ? '#374151' : '#9CA3AF' }}>
+                sx={{ color: step.isCurrent ? '#16A34A' : step.isCompleted ? '#374151' : '#9CA3AF' }}>
                 {step.label}
               </Typography>
               {step.completedAt && (
@@ -111,7 +111,7 @@ function OrderItems({ items }) {
           <Box key={item.id} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Avatar
               src={item.product?.image} alt={item.product_name}
-              sx={{ width: 48, height: 48, bgcolor: '#D8F3DC', fontSize: 20, borderRadius: 2 }}
+              sx={{ width: 48, height: 48, bgcolor: '#F0FDF4', fontSize: 20, borderRadius: 2 }}
             >
               🛒
             </Avatar>
@@ -173,7 +173,7 @@ function AmountBreakdown({ order }) {
         <Divider />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="subtitle1" fontWeight={800}>Total</Typography>
-          <Typography variant="subtitle1" fontWeight={900} sx={{ color: '#1B4332' }}>{formatCurrency(total)}</Typography>
+          <Typography variant="subtitle1" fontWeight={900} sx={{ color: '#16A34A' }}>{formatCurrency(total)}</Typography>
         </Box>
       </Box>
     </Paper>
@@ -187,7 +187,7 @@ function DeliveryAddress({ order }) {
   return (
     <Paper sx={{ p: 3, borderRadius: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-        <LocationOn sx={{ color: '#1B4332' }} />
+        <LocationOn sx={{ color: '#16A34A' }} />
         <Typography variant="h6" fontWeight={700}>Delivery Address</Typography>
       </Box>
       <Typography fontWeight={700}>{addr.name}</Typography>
@@ -298,12 +298,12 @@ export default function OrderDetailPage({ params }) {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Button
             component={Link} href="/orders"
             startIcon={<ArrowBack />}
-            sx={{ color: 'rgba(255,248,240,0.75)', mb: 1.5, fontWeight: 600, '&:hover': { color: '#FFF8F0' } }}
+            sx={{ color: 'rgba(255,248,240,0.75)', mb: 1.5, fontWeight: 600, '&:hover': { color: '#FFFFFF' } }}
           >
             Back to Orders
           </Button>

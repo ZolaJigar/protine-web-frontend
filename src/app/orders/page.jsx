@@ -152,7 +152,7 @@ export default function OrdersPage() {
 
   return (
     <MainLayout>
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Typography variant="h4" sx={{ fontWeight: 800 }}>My Orders</Typography>
           <Typography sx={{ color: 'rgba(255,248,240,0.75)', mt: 0.5 }}>
@@ -325,7 +325,7 @@ function OrderCard({ order, canCancel, reorderLoading, onCancel, onReorder, onDo
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                bgcolor: '#FFF8F0',
+                bgcolor: '#FFFFFF',
                 borderRadius: 2,
                 px: 1.5,
                 py: 0.75,
@@ -334,7 +334,7 @@ function OrderCard({ order, canCancel, reorderLoading, onCancel, onReorder, onDo
               <Avatar
                 src={item.product?.image}
                 alt={item.product_name}
-                sx={{ width: 32, height: 32, bgcolor: '#1B4332', fontSize: 16 }}
+                sx={{ width: 32, height: 32, bgcolor: '#16A34A', fontSize: 16 }}
               >
                 🛒
               </Avatar>

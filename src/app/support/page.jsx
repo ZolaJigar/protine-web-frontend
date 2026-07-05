@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Paper, TextField, Button,
-  Accordion, AccordionSummary, AccordionDetails, CircularProgress,
+  Accordion, AccordionSummary, AccordionDetails, CircularProgress, Skeleton,
 } from '@mui/material';
-import { ExpandMore, Email, Phone, WhatsApp, Support, CheckCircle } from '@mui/icons-material';
+import { ExpandMore, Email, Phone, WhatsApp, Support, CheckCircle, LocationOn } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
-import { supportAPI } from '@/lib/api';
+import { contactUsAPI } from '@/lib/api';
 import { isValidEmail } from '@/lib/functions';
 
 const faqs = [
@@ -20,11 +20,59 @@ const faqs = [
   { q: 'How do I cancel my order?', a: "You can cancel within 2 hours from \"My Orders\", or contact our support team." },
 ];
 
+/**
+ * Pick the best icon and color for a contact-us entry based on its title/email/phone.
+ */
+function getChannelMeta(entry) {
+  const titleLower = (entry.title || '').toLowerCase();
+
+  if (titleLower.includes('whatsapp')) {
+    return { icon: <WhatsApp sx={{ fontSize: 36, color: '#25D366' }} />, color: '#25D366', link: `https://wa.me/${entry.phone?.replace(/\D/g, '')}` };
+  }
+  if (titleLower.includes('phone') || titleLower.includes('call') || (entry.phone && !entry.email)) {
+    return { icon: <Phone sx={{ fontSize: 36, color: '#2E7D32' }} />, color: '#2E7D32', link: `tel:${entry.phone}` };
+  }
+  if (titleLower.includes('email') || titleLower.includes('mail') || (entry.email && !entry.phone)) {
+    return { icon: <Email sx={{ fontSize: 36, color: '#FF8F00' }} />, color: '#FF8F00', link: `mailto:${entry.email}` };
+  }
+  // Default: location/office
+  return { icon: <LocationOn sx={{ fontSize: 36, color: '#1565C0' }} />, color: '#1565C0', link: null };
+}
+
+function ContactCardSkeleton() {
+  return (
+    <Paper sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, borderRadius: 2 }}>
+      <Skeleton variant="circular" width={36} height={36} />
+      <Box sx={{ flex: 1 }}>
+        <Skeleton variant="text" width="40%" height={16} />
+        <Skeleton variant="text" width="60%" height={20} />
+      </Box>
+    </Paper>
+  );
+}
+
 export default function SupportPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const [contacts, setContacts] = useState([]);
+  const [contactsLoading, setContactsLoading] = useState(true);
+
+  useEffect(() => {
+    contactUsAPI
+      .getList()
+      .then((res) => {
+        const list = res?.data?.data?.data ?? res?.data?.data ?? [];
+        setContacts(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {
+        // silently fall back to empty — no crash
+        setContacts([]);
+      })
+      .finally(() => setContactsLoading(false));
+  }, []);
 
   const validate = () => {
     const errs = {};
@@ -46,20 +94,17 @@ export default function SupportPage() {
 
     setLoading(true);
     const toastId = toast.loading('Submitting your ticket...');
-    try {
-      await supportAPI.createTicket(form);
-    } catch {
-      // frontend demo — treat as success
-    } finally {
-      toast.update(toastId, {
-        render: "✅ Support ticket submitted! We'll reply within 24 hours.",
-        type: 'success',
-        isLoading: false,
-        autoClose: 4000,
-      });
-      setLoading(false);
-      setSubmitted(true);
-    }
+    // Simulate a short delay — replace with `await supportAPI.createTicket(form)`
+    // once the POST /support/tickets backend endpoint is live.
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    toast.update(toastId, {
+      render: "✅ Support ticket submitted! We'll reply within 24 hours.",
+      type: 'success',
+      isLoading: false,
+      autoClose: 4000,
+    });
+    setLoading(false);
+    setSubmitted(true);
   };
 
   return (
@@ -95,41 +140,103 @@ export default function SupportPage() {
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>Contact Us</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {[
-                { icon: <WhatsApp sx={{ fontSize: 36, color: '#25D366' }} />, label: 'WhatsApp', value: '+91 99999 88888', link: 'https://wa.me/9999988888', color: '#25D366' },
-                { icon: <Phone sx={{ fontSize: 36, color: '#2E7D32' }} />, label: 'Phone', value: '+91 99999 88888', link: 'tel:+919999988888', color: '#2E7D32' },
-                { icon: <Email sx={{ fontSize: 36, color: '#FF8F00' }} />, label: 'Email', value: 'support@protineweb.com', link: 'mailto:support@protineweb.com', color: '#FF8F00' },
-              ].map((channel) => (
-                <Paper
-                  key={channel.label}
-                  component="a"
-                  href={channel.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="card-3d"
-                  sx={{
-                    p: 2.5, display: 'flex', alignItems: 'center', gap: 2,
-                    textDecoration: 'none', cursor: 'pointer',
-                    border: `2px solid ${channel.color}20`,
-                    '&:hover': { border: `2px solid ${channel.color}50` },
-                  }}
-                >
-                  {channel.icon}
-                  <Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}>
-                      {channel.label}
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                      {channel.value}
-                    </Typography>
-                  </Box>
-                </Paper>
-              ))}
+              {contactsLoading ? (
+                <>
+                  <ContactCardSkeleton />
+                  <ContactCardSkeleton />
+                  <ContactCardSkeleton />
+                </>
+              ) : contacts.length > 0 ? (
+                contacts.map((entry) => {
+                  const { icon, color, link } = getChannelMeta(entry);
+                  const displayValue = entry.phone || entry.email || entry.description || '';
+
+                  const cardProps = link
+                    ? { component: 'a', href: link, target: '_blank', rel: 'noopener noreferrer' }
+                    : {};
+
+                  return (
+                    <Paper
+                      key={entry.id}
+                      {...cardProps}
+                      className="card-3d"
+                      sx={{
+                        p: 2.5,
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 2,
+                        textDecoration: 'none',
+                        cursor: link ? 'pointer' : 'default',
+                        border: `2px solid ${color}20`,
+                        '&:hover': link ? { border: `2px solid ${color}50` } : {},
+                      }}
+                    >
+                      <Box sx={{ mt: 0.5 }}>{icon}</Box>
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}
+                        >
+                          {entry.title}
+                        </Typography>
+                        {entry.description && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                            {entry.description}
+                          </Typography>
+                        )}
+                        {displayValue && displayValue !== entry.description && (
+                          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                            {displayValue}
+                          </Typography>
+                        )}
+                        {/* Show both phone and email if both exist and differ from description */}
+                        {entry.phone && entry.email && (
+                          <Typography variant="body2" sx={{ color: '#FF8F00', mt: 0.25 }}>
+                            {entry.email}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Paper>
+                  );
+                })
+              ) : (
+                /* Fallback static channels if API returns nothing */
+                [
+                  { icon: <WhatsApp sx={{ fontSize: 36, color: '#25D366' }} />, label: 'WhatsApp', value: '+91 99999 88888', link: 'https://wa.me/9999988888', color: '#25D366' },
+                  { icon: <Phone sx={{ fontSize: 36, color: '#2E7D32' }} />, label: 'Phone', value: '+91 99999 88888', link: 'tel:+919999988888', color: '#2E7D32' },
+                  { icon: <Email sx={{ fontSize: 36, color: '#FF8F00' }} />, label: 'Email', value: 'support@protineweb.com', link: 'mailto:support@protineweb.com', color: '#FF8F00' },
+                ].map((channel) => (
+                  <Paper
+                    key={channel.label}
+                    component="a"
+                    href={channel.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="card-3d"
+                    sx={{
+                      p: 2.5, display: 'flex', alignItems: 'center', gap: 2,
+                      textDecoration: 'none', cursor: 'pointer',
+                      border: `2px solid ${channel.color}20`,
+                      '&:hover': { border: `2px solid ${channel.color}50` },
+                    }}
+                  >
+                    {channel.icon}
+                    <Box>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}>
+                        {channel.label}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                        {channel.value}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                ))
+              )}
             </Box>
 
             <Box sx={{ mt: 3, p: 2.5, bgcolor: '#E8F5E9', borderRadius: 3 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.dark', mb: 1 }}>
-                ⏰ Support Hours
+                🕐 Support Hours
               </Typography>
               <Typography variant="body2" color="text.secondary">Mon – Sat: 9:00 AM – 8:00 PM</Typography>
               <Typography variant="body2" color="text.secondary">Sunday: 10:00 AM – 5:00 PM</Typography>
@@ -181,25 +288,18 @@ export default function SupportPage() {
           </Box>
         </Box>
 
-        {/* Row 2: FAQ — full width, 2-column accordion grid */}
+        {/* Row 2: FAQ — full width */}
         <Box sx={{ width: '100%' }}>
           <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
             Frequently Asked Questions
           </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1.5,
-              width: '100%',
-            }}
-          >
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: '100%' }}>
             {faqs.map((faq, i) => (
               <Accordion
                 key={i}
-                sx={{ borderRadius: '12px !important', '&:before': { display: 'none' }, boxShadow: '0 2px 10px rgba(27,67,50,0.08)', mb: 0 }}
+                sx={{ borderRadius: '12px !important', '&:before': { display: 'none' }, boxShadow: '0 2px 10px rgba(22,163,74,0.08)', mb: 0 }}
               >
-                <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#1B4332' }} />}>
+                <AccordionSummary expandIcon={<ExpandMore sx={{ color: '#16A34A' }} />}>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>{faq.q}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>

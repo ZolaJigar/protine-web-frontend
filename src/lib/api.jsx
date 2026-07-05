@@ -409,6 +409,30 @@ export const paymentsAPI = {
   refund: (paymentId, data) => api.post(`/payments/${paymentId}/refund`, data),
 };
 
+// ─── BANNERS ─────────────────────────────────────────────────────────────────
+export const bannersAPI = {
+  /** POST /banners/list — public, no auth required */
+  getList: (body = { page: 1, limit: 10 }) => api.post('/banners/list', body),
+};
+
+// ─── CONTACT US ──────────────────────────────────────────────────────────────
+export const contactUsAPI = {
+  /** GET /contact-us/list — public, no auth required */
+  getList: () => api.get('/contact-us/list'),
+
+  /** GET /admin/contact-us/:id — auth required */
+  getById: (id) => api.get(`/admin/contact-us/${id}`),
+
+  /** POST /admin/contact-us/create — auth required */
+  create: (data) => api.post('/admin/contact-us/create', data),
+
+  /** PUT /admin/contact-us/update/:id — auth required */
+  update: (id, data) => api.put(`/admin/contact-us/update/${id}`, data),
+
+  /** DELETE /admin/contact-us/delete/:id — auth required */
+  delete: (id) => api.delete(`/admin/contact-us/delete/${id}`),
+};
+
 // ─── SUPPORT ─────────────────────────────────────────────────────────────────
 export const supportAPI = {
   getTickets: () => api.get('/support/tickets'),

@@ -32,8 +32,8 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
-        background: 'linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #1C1917 100%)',
-        color: '#FFF8F0',
+        background: 'linear-gradient(160deg, #16A34A 0%, #4ADE80 100%)',
+        color: '#FFFFFF',
         pt: 8, pb: 4, mt: 'auto',
         width: '100%',
       }}
@@ -84,7 +84,7 @@ export default function Footer() {
                   sx={{
                     color: 'rgba(255,248,240,0.75)',
                     border: '1px solid rgba(255,248,240,0.2)',
-                    '&:hover': { color: '#F59E0B', borderColor: '#F59E0B', background: 'rgba(245,158,11,0.12)' },
+                    '&:hover': { color: '#FF6B35', borderColor: '#FF6B35', background: 'rgba(245,158,11,0.12)' },
                   }}
                 >
                   {s.icon}
@@ -96,7 +96,7 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([section, links]) => (
             <Box key={section}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#F59E0B', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FF6B35', mb: 2 }}>
                 {section}
               </Typography>
               <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
@@ -117,7 +117,7 @@ export default function Footer() {
 
           {/* Contact col */}
           <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#F59E0B', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FF6B35', mb: 2 }}>
               Contact Us
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -127,7 +127,7 @@ export default function Footer() {
                 { icon: <LocationOn fontSize="small" />, text: 'Mumbai, Maharashtra, India' },
               ].map((item) => (
                 <Box key={item.text} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                  <Box sx={{ color: '#F59E0B', mt: 0.2, flexShrink: 0 }}>{item.icon}</Box>
+                  <Box sx={{ color: '#FF6B35', mt: 0.2, flexShrink: 0 }}>{item.icon}</Box>
                   <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.7)', fontSize: 13 }}>
                     {item.text}
                   </Typography>

@@ -3,16 +3,16 @@ import { Box, Container, Typography, Divider, Paper } from '@mui/material';
 import { LocalShipping, WhatsApp, AccessTime, CurrencyRupee } from '@mui/icons-material';
 
 const highlights = [
-  { icon: <LocalShipping sx={{ fontSize: 32, color: '#1B4332' }} />, title: 'Free Shipping', desc: 'On all orders above ₹499 across India.', bg: '#D8F3DC' },
-  { icon: <AccessTime sx={{ fontSize: 32, color: '#D97706' }} />,     title: 'Fast Delivery',  desc: '2–5 business days to most pincodes.', bg: '#FEF3C7' },
-  { icon: <WhatsApp sx={{ fontSize: 32, color: '#1B4332' }} />,       title: 'Live Tracking',  desc: 'WhatsApp delivery reminders at every step.', bg: '#D8F3DC' },
-  { icon: <CurrencyRupee sx={{ fontSize: 32, color: '#D97706' }} />,  title: '₹49 Flat Fee',   desc: 'For orders below ₹499. No hidden charges.', bg: '#FEF3C7' },
+  { icon: <LocalShipping sx={{ fontSize: 32, color: '#16A34A' }} />, title: 'Free Shipping', desc: 'On all orders above Γé╣499 across India.', bg: '#F0FDF4' },
+  { icon: <AccessTime sx={{ fontSize: 32, color: '#E5501A' }} />,     title: 'Fast Delivery',  desc: '2ΓÇô5 business days to most pincodes.', bg: '#FFF0EB' },
+  { icon: <WhatsApp sx={{ fontSize: 32, color: '#16A34A' }} />,       title: 'Live Tracking',  desc: 'WhatsApp delivery reminders at every step.', bg: '#F0FDF4' },
+  { icon: <CurrencyRupee sx={{ fontSize: 32, color: '#E5501A' }} />,  title: 'Γé╣49 Flat Fee',   desc: 'For orders below Γé╣499. No hidden charges.', bg: '#FFF0EB' },
 ];
 
 const sections = [
   {
     title: 'Delivery Timelines',
-    content: `Metro cities (Mumbai, Delhi, Bengaluru, Chennai, Hyderabad, Kolkata): 2–3 business days. Tier-2 cities: 3–4 business days. Remote or rural areas: 4–7 business days. Timelines are estimates and may vary during peak seasons, public holidays, or due to unforeseen circumstances.`,
+    content: `Metro cities (Mumbai, Delhi, Bengaluru, Chennai, Hyderabad, Kolkata): 2ΓÇô3 business days. Tier-2 cities: 3ΓÇô4 business days. Remote or rural areas: 4ΓÇô7 business days. Timelines are estimates and may vary during peak seasons, public holidays, or due to unforeseen circumstances.`,
   },
   {
     title: 'Order Processing',
@@ -43,7 +43,7 @@ const sections = [
 export default function ShippingPage() {
   return (
     <MainLayout>
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 6, color: '#FFF8F0', textAlign: 'center' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 6, color: '#FFFFFF', textAlign: 'center' }}>
         <Container maxWidth="md">
           <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>Shipping Policy</Typography>
           <Typography sx={{ color: 'rgba(255,248,240,0.75)', fontSize: 16 }}>
@@ -62,26 +62,26 @@ export default function ShippingPage() {
           }}
         >
           {highlights.map((h) => (
-            <Paper key={h.title} sx={{ p: 3, borderRadius: 3, textAlign: 'center', boxShadow: '0 4px 20px rgba(27,67,50,0.08)' }}>
+            <Paper key={h.title} sx={{ p: 3, borderRadius: 3, textAlign: 'center', boxShadow: '0 4px 20px rgba(22,163,74,0.08)' }}>
               <Box sx={{ width: 60, height: 60, borderRadius: 3, bgcolor: h.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
                 {h.icon}
               </Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332', mb: 0.5 }}>{h.title}</Typography>
-              <Typography variant="caption" sx={{ color: '#57534E', lineHeight: 1.7 }}>{h.desc}</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#16A34A', mb: 0.5 }}>{h.title}</Typography>
+              <Typography variant="caption" sx={{ color: '#4B5563', lineHeight: 1.7 }}>{h.desc}</Typography>
             </Paper>
           ))}
         </Box>
 
-        <Box sx={{ bgcolor: '#FFF8F0', borderRadius: 4, p: { xs: 3, md: 6 }, boxShadow: '0 4px 24px rgba(27,67,50,0.08)' }}>
+        <Box sx={{ bgcolor: '#FFFFFF', borderRadius: 4, p: { xs: 3, md: 6 }, boxShadow: '0 4px 24px rgba(22,163,74,0.08)' }}>
           {sections.map((sec, i) => (
             <Box key={i} sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1B4332', mb: 1.5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#16A34A', mb: 1.5 }}>
                 {sec.title}
               </Typography>
-              <Typography variant="body1" sx={{ color: '#57534E', lineHeight: 1.9 }}>
+              <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.9 }}>
                 {sec.content}
               </Typography>
-              {i < sections.length - 1 && <Divider sx={{ mt: 4, borderColor: '#E7E5E4' }} />}
+              {i < sections.length - 1 && <Divider sx={{ mt: 4, borderColor: '#E5E7EB' }} />}
             </Box>
           ))}
         </Box>

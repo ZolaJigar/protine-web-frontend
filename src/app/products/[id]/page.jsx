@@ -22,7 +22,7 @@ function InfoRow({ label, value }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px solid #F1F5F9' }}>
       <Typography sx={{ fontSize: 13, color: '#64748B' }}>{label}</Typography>
-      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1C1917', textAlign: 'right', maxWidth: '60%' }}>{value}</Typography>
+      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'right', maxWidth: '60%' }}>{value}</Typography>
     </Box>
   );
 }
@@ -94,7 +94,7 @@ export default function ProductDetailPage() {
     return (
       <MainLayout>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress sx={{ color: '#1B4332' }} />
+          <CircularProgress sx={{ color: '#16A34A' }} />
         </Box>
       </MainLayout>
     );
@@ -232,7 +232,7 @@ export default function ProductDetailPage() {
                   }}
                 >
                   <IconButton size="small" onClick={() => setImgIndex((i) => (i - 1 + imageList.length) % imageList.length)}
-                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#1B4332' } }}>
+                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#16A34A' } }}>
                     <ArrowBackIos sx={{ fontSize: 13, ml: 0.5 }} />
                   </IconButton>
 
@@ -245,10 +245,10 @@ export default function ProductDetailPage() {
                           width: 56, height: 56, flexShrink: 0, borderRadius: 1.5, overflow: 'hidden',
                           cursor: 'pointer',
                           border: '2px solid',
-                          borderColor: i === imgIndex ? '#1B4332' : '#E2E8F0',
+                          borderColor: i === imgIndex ? '#16A34A' : '#E2E8F0',
                           opacity: i === imgIndex ? 1 : 0.6,
                           transition: 'all 0.15s',
-                          '&:hover': { opacity: 1, borderColor: '#1B4332' },
+                          '&:hover': { opacity: 1, borderColor: '#16A34A' },
                         }}
                       >
                         <img src={src} alt={`Thumb ${i + 1}`}
@@ -258,7 +258,7 @@ export default function ProductDetailPage() {
                   </Box>
 
                   <IconButton size="small" onClick={() => setImgIndex((i) => (i + 1) % imageList.length)}
-                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#1B4332' } }}>
+                    sx={{ flexShrink: 0, color: '#94A3B8', '&:hover': { color: '#16A34A' } }}>
                     <ArrowForwardIos sx={{ fontSize: 13 }} />
                   </IconButton>
                 </Box>
@@ -274,7 +274,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Title */}
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1C1917', lineHeight: 1.2, mb: 0.75 }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#111827', lineHeight: 1.2, mb: 0.75 }}>
               {product.name}
             </Typography>
 
@@ -288,7 +288,7 @@ export default function ProductDetailPage() {
             {/* Price + stock */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 0.5 }}>
               {displayPrice !== null && (
-                <Typography sx={{ fontSize: 32, fontWeight: 900, color: '#1B4332', lineHeight: 1 }}>
+                <Typography sx={{ fontSize: 32, fontWeight: 900, color: '#16A34A', lineHeight: 1 }}>
                   {formatCurrency(displayPrice)}
                 </Typography>
               )}
@@ -348,7 +348,7 @@ export default function ProductDetailPage() {
 
             {/* ── Qty + actions ── */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', border: '1.5px solid #1B4332', borderRadius: '50px', overflow: 'hidden' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', border: '1.5px solid #16A34A', borderRadius: '50px', overflow: 'hidden' }}>
                 <IconButton size="small" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label="Decrease" sx={{ borderRadius: 0, px: 1.5 }}>
                   <Remove fontSize="small" />
                 </IconButton>
@@ -365,9 +365,9 @@ export default function ProductDetailPage() {
                 disabled={!selectedVariant || !inStock || addingToCart}
                 sx={{
                   flex: 1, fontWeight: 700, borderRadius: '50px', textTransform: 'none', fontSize: 15,
-                  background: 'linear-gradient(135deg, #1B4332, #2D6A4F)',
-                  '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' },
-                  '&.Mui-disabled': { background: '#A8A29E', color: '#fff' },
+                  background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
+                  '&:hover': { background: 'linear-gradient(135deg, #15803D, #16A34A)' },
+                  '&.Mui-disabled': { background: '#9CA3AF', color: '#fff' },
                 }}
               >
                 {!inStock ? 'Out of Stock' : addingToCart ? 'Adding…' : 'Add to Cart'}
@@ -414,7 +414,7 @@ export default function ProductDetailPage() {
                 { icon: <Security fontSize="small" />,      text: 'Secure checkout' },
               ].map((item) => (
                 <Box key={item.text} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Box sx={{ color: '#1B4332' }}>{item.icon}</Box>
+                  <Box sx={{ color: '#16A34A' }}>{item.icon}</Box>
                   <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>{item.text}</Typography>
                 </Box>
               ))}

@@ -17,8 +17,8 @@ const mockInvoices = [
 ];
 
 const kpiCards = (invoices) => [
-  { label: 'Total Invoices', value: invoices.length,                                                          color: '#1B4332', bg: '#D8F3DC', icon: '🧾' },
-  { label: 'Total Spent',    value: formatCurrency(invoices.reduce((s, i) => s + i.amount, 0)),               color: '#D97706', bg: '#FEF3C7', icon: '💰' },
+  { label: 'Total Invoices', value: invoices.length,                                                          color: '#16A34A', bg: '#F0FDF4', icon: '🧾' },
+  { label: 'Total Spent',    value: formatCurrency(invoices.reduce((s, i) => s + i.amount, 0)),               color: '#E5501A', bg: '#FFF0EB', icon: '💰' },
   { label: 'Paid',           value: invoices.filter((i) => i.status === 'paid').length,                       color: '#1565C0', bg: '#E0F2FE', icon: '✅' },
   { label: 'Pending',        value: invoices.filter((i) => i.status === 'pending').length,                    color: '#C2410C', bg: '#FFEDD5', icon: '⏳' },
 ];
@@ -27,7 +27,7 @@ export default function InvoicesPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Receipt sx={{ fontSize: 40 }} />
@@ -73,7 +73,7 @@ export default function InvoicesPage() {
                 <Typography variant="h4" sx={{ fontWeight: 900, color: card.color, lineHeight: 1.1 }}>
                   {card.value}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#57534E', fontWeight: 500, mt: 0.25 }}>
+                <Typography variant="body2" sx={{ color: '#4B5563', fontWeight: 500, mt: 0.25 }}>
                   {card.label}
                 </Typography>
               </Box>
@@ -90,7 +90,7 @@ export default function InvoicesPage() {
                   {['Invoice #', 'Order #', 'Date', 'Items', 'Amount', 'Status', 'Actions'].map((head) => (
                     <TableCell
                       key={head}
-                      sx={{ bgcolor: '#1B4332', color: '#FFF8F0', fontWeight: 700, fontSize: 14 }}
+                      sx={{ bgcolor: '#16A34A', color: '#FFFFFF', fontWeight: 700, fontSize: 14 }}
                     >
                       {head}
                     </TableCell>
@@ -102,15 +102,15 @@ export default function InvoicesPage() {
                   <TableRow
                     key={invoice.id}
                     sx={{
-                      bgcolor: i % 2 === 0 ? '#FFFFFF' : '#FFF8F0',
-                      '&:hover': { bgcolor: '#D8F3DC30' },
+                      bgcolor: i % 2 === 0 ? '#FFFFFF' : '#FFFFFF',
+                      '&:hover': { bgcolor: '#F0FDF430' },
                     }}
                   >
-                    <TableCell sx={{ fontWeight: 700, color: '#1B4332' }}>{invoice.id}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#16A34A' }}>{invoice.id}</TableCell>
                     <TableCell>{invoice.orderId}</TableCell>
                     <TableCell>{formatDate(invoice.date)}</TableCell>
                     <TableCell>{invoice.items} items</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1B4332' }}>
+                    <TableCell sx={{ fontWeight: 700, color: '#16A34A' }}>
                       {formatCurrency(invoice.amount)}
                     </TableCell>
                     <TableCell>

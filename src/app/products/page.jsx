@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Box, Container, Typography, TextField, InputAdornment, Select,
   MenuItem, FormControl, InputLabel, Slider, Chip, Drawer, IconButton,
@@ -22,6 +23,8 @@ const sortOptions = [
 ];
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+
   const [search,        setSearch]        = useState('');
   const [category,      setCategory]      = useState(null);   // { id, name } | null = All
   const [sortBy,        setSortBy]        = useState('default');
@@ -36,12 +39,23 @@ export default function ProductsPage() {
   const [apiCategories, setApiCategories] = useState([]);
   const [catsLoading,   setCatsLoading]   = useState(true);
 
-  // ── Fetch categories once ──────────────────────────────────────────────────
+  // ── Fetch categories once, then apply URL param ────────────────────────────
   useEffect(() => {
     categoriesAPI.getAll({ page: 1, limit: 100 })
-      .then((res) => setApiCategories(res.data?.data?.data ?? []))
+      .then((res) => {
+        const list = res.data?.data?.data ?? [];
+        setApiCategories(list);
+
+        // Pre-select category from URL ?category_id=<id>
+        const urlCategoryId = searchParams.get('category_id');
+        if (urlCategoryId) {
+          const matched = list.find((c) => String(c.id) === String(urlCategoryId));
+          if (matched) setCategory(matched);
+        }
+      })
       .catch(() => {})
       .finally(() => setCatsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Fetch products (debounced on search) ───────────────────────────────────
@@ -109,9 +123,9 @@ export default function ProductsPage() {
                   onClick={() => handleCategoryClick(cat)}
                   sx={{
                     px: 2, py: 1, borderRadius: 2, cursor: 'pointer', fontSize: 14, fontWeight: 500,
-                    bgcolor: isActive ? '#1B4332' : 'transparent',
-                    color:   isActive ? '#FFF8F0' : '#1C1917',
-                    '&:hover': { bgcolor: isActive ? '#0D2B1F' : '#F5F0E8' },
+                    bgcolor: isActive ? '#16A34A' : 'transparent',
+                    color:   isActive ? '#FFFFFF' : '#111827',
+                    '&:hover': { bgcolor: isActive ? '#15803D' : '#F0FDF4' },
                     transition: 'all 0.2s',
                   }}
                 >
@@ -133,9 +147,9 @@ export default function ProductsPage() {
         valueLabelFormat={(v) => `₹${v}`}
         sx={{
           mb: 2,
-          color: '#1B4332',
-          '& .MuiSlider-thumb': { bgcolor: '#F59E0B' },
-          '& .MuiSlider-track': { bgcolor: '#1B4332' },
+          color: '#16A34A',
+          '& .MuiSlider-thumb': { bgcolor: '#FF6B35' },
+          '& .MuiSlider-track': { bgcolor: '#16A34A' },
         }}
       />
     </Box>
@@ -144,7 +158,7 @@ export default function ProductsPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Typography variant="h4" sx={{ fontWeight: 800 }}>All Products</Typography>
           <Typography variant="body1" sx={{ color: 'rgba(255,248,240,0.75)', mt: 0.5 }}>
@@ -224,7 +238,7 @@ export default function ProductsPage() {
             {/* Loading */}
             {prodsLoading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-                <CircularProgress sx={{ color: '#1B4332' }} />
+                <CircularProgress sx={{ color: '#16A34A' }} />
               </Box>
             )}
 

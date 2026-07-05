@@ -1,37 +1,37 @@
 @import "tailwindcss";
 
 /* ─── Protine Web Brand Palette ─────────────────────────────────────────────
-   Deep Forest Green  #1B4332
-   Warm Cream         #FFF8F0
-   Vibrant Amber      #F59E0B
-   Rich Charcoal      #1C1917
+   Deep Forest Green  #16A34A
+   Warm Cream         #FFFFFF
+   Vibrant Amber      #FF6B35
+   Rich Charcoal      #111827
    ────────────────────────────────────────────────────────────────────────── */
 :root {
-  --green:        #1B4332;
-  --green-mid:    #2D6A4F;
-  --green-light:  #40916C;
-  --green-pale:   #D8F3DC;
+  --green:        #16A34A;
+  --green-mid:    #4ADE80;
+  --green-light:  #4ADE80;
+  --green-pale:   #F0FDF4;
 
-  --amber:        #F59E0B;
-  --amber-light:  #FCD34D;
-  --amber-dark:   #D97706;
+  --amber:        #FF6B35;
+  --amber-light:  #FF8C5A;
+  --amber-dark:   #E5501A;
 
-  --cream:        #FFF8F0;
+  --cream:        #FFFFFF;
   --cream-dark:   #FFF0DC;
 
-  --charcoal:     #1C1917;
+  --charcoal:     #111827;
   --charcoal-mid: #292524;
   --charcoal-soft:#44403C;
 
-  --text-primary:   #1C1917;
-  --text-secondary: #57534E;
-  --text-muted:     #A8A29E;
+  --text-primary:   #111827;
+  --text-secondary: #4B5563;
+  --text-muted:     #9CA3AF;
 
-  --bg-main:  #FFF8F0;
+  --bg-main:  #FFFFFF;
   --bg-card:  #FFFFFF;
 
-  --foreground: #1C1917;
-  --background: #FFF8F0;
+  --foreground: #111827;
+  --background: #FFFFFF;
 }
 
 @theme inline {
@@ -64,7 +64,7 @@ body {
 
 /* ─── Hero gradient ─────────────────────────────────────────────────────────── */
 .hero-3d {
-  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 55%, #40916C 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #4ADE80 55%, #4ADE80 100%);
   position: relative;
   overflow: hidden;
 }
@@ -105,7 +105,7 @@ body {
 
 /* ─── Buttons ───────────────────────────────────────────────────────────────── */
 .btn-primary {
-  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #4ADE80 100%);
   color: #fff;
   border: none;
   padding: 12px 28px;
@@ -120,8 +120,8 @@ body {
   box-shadow: 0 8px 28px rgba(27,67,50,0.45);
 }
 .btn-secondary {
-  background: linear-gradient(135deg, #F59E0B 0%, #FCD34D 100%);
-  color: #1C1917;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+  color: #111827;
   border: none;
   padding: 12px 28px;
   border-radius: 50px;
@@ -136,7 +136,7 @@ body {
 }
 
 /* ─── Footer links ──────────────────────────────────────────────────────────── */
-.footer-link:hover { color: #FFF8F0 !important; }
+.footer-link:hover { color: #FFFFFF !important; }
 
 /* ─── Section title underline ───────────────────────────────────────────────── */
 .section-title {
@@ -156,8 +156,8 @@ body {
 }
 
 /* ─── Toast overrides ───────────────────────────────────────────────────────── */
-.Toastify__toast--success { background: #1B4332 !important; }
+.Toastify__toast--success { background: #16A34A !important; }
 .Toastify__toast--error   { background: #7F1D1D !important; }
 .Toastify__toast--warning { background: #92400E !important; }
 .Toastify__toast--info    { background: #1C3D5A !important; }
-.Toastify__progress-bar--success { background: #F59E0B !important; }
+.Toastify__progress-bar--success { background: #FF6B35 !important; }

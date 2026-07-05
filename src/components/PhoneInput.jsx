@@ -133,7 +133,7 @@ export default function PhoneInput({
 
   return (
     <FormControl fullWidth error={!!error} variant="outlined">
-      <InputLabel htmlFor={inputId} sx={{ '&.Mui-focused': { color: '#1B4332' } }}>
+      <InputLabel htmlFor={inputId} sx={{ '&.Mui-focused': { color: '#16A34A' } }}>
         {label}
       </InputLabel>
 
@@ -148,8 +148,8 @@ export default function PhoneInput({
         sx={{
           borderRadius: '12px',
           '& .MuiOutlinedInput-notchedOutline': { borderColor: '#C4C4C4' },
-          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2D6A4F' },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1B4332' },
+          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#4ADE80' },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#16A34A' },
         }}
         startAdornment={
           <InputAdornment position="start" sx={{ mr: 0 }}>

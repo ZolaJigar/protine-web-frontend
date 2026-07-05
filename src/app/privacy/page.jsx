@@ -43,7 +43,7 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <MainLayout>
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 6, color: '#FFF8F0', textAlign: 'center' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 6, color: '#FFFFFF', textAlign: 'center' }}>
         <Container maxWidth="md">
           <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>Privacy Policy</Typography>
           <Typography sx={{ color: 'rgba(255,248,240,0.75)', fontSize: 16 }}>
@@ -53,20 +53,20 @@ export default function PrivacyPage() {
       </Box>
 
       <Container maxWidth="md" sx={{ py: 7 }}>
-        <Box sx={{ bgcolor: '#FFF8F0', borderRadius: 4, p: { xs: 3, md: 6 }, boxShadow: '0 4px 24px rgba(27,67,50,0.08)' }}>
-          <Typography variant="body1" sx={{ color: '#57534E', lineHeight: 1.9, mb: 5 }}>
+        <Box sx={{ bgcolor: '#FFFFFF', borderRadius: 4, p: { xs: 3, md: 6 }, boxShadow: '0 4px 24px rgba(22,163,74,0.08)' }}>
+          <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.9, mb: 5 }}>
             At Protine Web, we are committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal information when you use our platform.
           </Typography>
 
           {sections.map((sec, i) => (
             <Box key={i} sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1B4332', mb: 1.5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#16A34A', mb: 1.5 }}>
                 {sec.title}
               </Typography>
-              <Typography variant="body1" sx={{ color: '#57534E', lineHeight: 1.9 }}>
+              <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.9 }}>
                 {sec.content}
               </Typography>
-              {i < sections.length - 1 && <Divider sx={{ mt: 4, borderColor: '#E7E5E4' }} />}
+              {i < sections.length - 1 && <Divider sx={{ mt: 4, borderColor: '#E5E7EB' }} />}
             </Box>
           ))}
         </Box>

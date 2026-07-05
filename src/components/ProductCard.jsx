@@ -56,13 +56,13 @@ function VariantRow({ variant, onAdd }) {
       {/* Name + price — takes remaining space */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
-          sx={{ fontSize: 14, fontWeight: 700, color: '#1B4332', lineHeight: 1.3 }}
+          sx={{ fontSize: 14, fontWeight: 700, color: '#16A34A', lineHeight: 1.3 }}
           noWrap
         >
           {variant.name}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
-          <Typography sx={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 800, color: '#15803D' }}>
             {fmt(price)}
           </Typography>
           {hasDiscount && (
@@ -132,9 +132,9 @@ function VariantRow({ variant, onAdd }) {
               whiteSpace: 'nowrap',
               flexShrink: 0,
               textTransform: 'none',
-              background: 'linear-gradient(135deg, #1B4332, #2D6A4F)',
-              '&:hover': { background: 'linear-gradient(135deg, #0D2B1F, #1B4332)' },
-              '&.Mui-disabled': { background: '#A8A29E', color: '#fff' },
+              background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
+              '&:hover': { background: 'linear-gradient(135deg, #15803D, #16A34A)' },
+              '&.Mui-disabled': { background: '#9CA3AF', color: '#fff' },
             }}
           >
             {adding ? 'Adding…' : 'Add'}
@@ -232,7 +232,7 @@ function VariantsSummary({ product, onOpen }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         cursor: count > 0 ? 'pointer' : 'default',
         borderTop: '1px solid #F1F5F9',
-        '&:hover': count > 0 ? { bgcolor: '#F8FAFC' } : {},
+        '&:hover': count > 0 ? { bgcolor: '#FFFFFF' } : {},
         transition: 'background 0.15s',
       }}
     >
@@ -245,7 +245,7 @@ function VariantsSummary({ product, onOpen }) {
         <Chip
           label={count}
           size="small"
-          sx={{ bgcolor: '#1B4332', color: '#fff', fontWeight: 700, height: 22, fontSize: 12, '& .MuiChip-label': { px: 1 } }}
+          sx={{ bgcolor: '#16A34A', color: '#fff', fontWeight: 700, height: 22, fontSize: 12, '& .MuiChip-label': { px: 1 } }}
         />
       ) : (
         <Typography sx={{ fontSize: 12, color: '#94A3B8' }}>None</Typography>
@@ -322,7 +322,7 @@ export default function ProductCard({ product }) {
               display: imageUrl ? 'none' : 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'linear-gradient(135deg, #CCEFDB, #E8F5E9)',
+              background: 'linear-gradient(135deg, #F0FDF4, #F0FDF4)',
               fontSize: 72,
             }}
             role="img"

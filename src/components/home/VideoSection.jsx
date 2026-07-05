@@ -14,7 +14,7 @@ export default function VideoSection() {
   const [playing, setPlaying] = useState(null);
 
   return (
-    <Box sx={{ py: 8, background: 'linear-gradient(160deg, #1C1917 0%, #1B4332 100%)', position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ py: 8, background: 'linear-gradient(160deg, #111827 0%, #16A34A 100%)', position: 'relative', overflow: 'hidden' }}>
       {/* Decorative blobs */}
       <Box sx={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, borderRadius: '50%', bgcolor: 'rgba(245,158,11,0.05)' }} />
       <Box sx={{ position: 'absolute', bottom: -80, right: -80, width: 300, height: 300, borderRadius: '50%', bgcolor: 'rgba(255,248,240,0.04)' }} />
@@ -22,10 +22,10 @@ export default function VideoSection() {
       <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
         {/* Heading */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 2 }}>
+          <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 2 }}>
             Food Stories
           </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 800, color: '#FFF8F0', mt: 1 }}>
+          <Typography variant="h3" sx={{ fontWeight: 800, color: '#FFFFFF', mt: 1 }}>
             Watch Our Food Videos
           </Typography>
           <Typography variant="body1" sx={{ color: 'rgba(255,248,240,0.65)', mt: 1, maxWidth: 500, mx: 'auto' }}>
@@ -80,14 +80,14 @@ export default function VideoSection() {
                   }}
                 >
                   <IconButton aria-label={`Play ${video.title}`}>
-                    <PlayCircleFilled sx={{ fontSize: 64, color: '#F59E0B' }} />
+                    <PlayCircleFilled sx={{ fontSize: 64, color: '#FF6B35' }} />
                   </IconButton>
                 </Box>
               </Box>
 
               {/* Info */}
               <Box sx={{ p: 2.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FFF8F0', mb: 0.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FFFFFF', mb: 0.5 }}>
                   {video.title}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.6)' }}>

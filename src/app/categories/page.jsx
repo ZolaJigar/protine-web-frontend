@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Box, Container, Typography, Card, CardContent, Chip,
   TextField, InputAdornment, CircularProgress, Alert,
@@ -15,11 +15,11 @@ const PAGE_SIZE = 20;
 // Deterministic colour palette cycled by index so cards stay visually distinct
 const PALETTE = [
   { color: '#B91C1C', bg: '#FEE2E2' },
-  { color: '#D97706', bg: '#FEF3C7' },
+  { color: '#E5501A', bg: '#FFF0EB' },
   { color: '#C2410C', bg: '#FFEDD5' },
-  { color: '#1B4332', bg: '#D8F3DC' },
-  { color: '#78350F', bg: '#FEF3C7' },
-  { color: '#2D6A4F', bg: '#D8F3DC' },
+  { color: '#16A34A', bg: '#F0FDF4' },
+  { color: '#78350F', bg: '#FFF0EB' },
+  { color: '#4ADE80', bg: '#F0FDF4' },
   { color: '#1E40AF', bg: '#DBEAFE' },
   { color: '#7C3AED', bg: '#EDE9FE' },
 ];
@@ -29,6 +29,7 @@ function getPalette(index) {
 }
 
 export default function CategoriesPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [total, setTotal]           = useState(0);
   const [search, setSearch]         = useState('');
@@ -71,7 +72,7 @@ export default function CategoriesPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Typography variant="h4" sx={{ fontWeight: 800 }}>Product Categories</Typography>
           <Typography sx={{ color: 'rgba(255,248,240,0.75)', mt: 0.5 }}>
@@ -112,7 +113,7 @@ export default function CategoriesPage() {
         {/* Loading */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-            <CircularProgress sx={{ color: '#1B4332' }} />
+            <CircularProgress sx={{ color: '#16A34A' }} />
           </Box>
         )}
 
@@ -141,20 +142,17 @@ export default function CategoriesPage() {
             {categories.map((cat, index) => {
               const { color, bg } = getPalette(index);
               return (
-                <Link
+                <Card
                   key={cat.id}
-                  href={`/categories/${cat.slug}`}
-                  style={{ textDecoration: 'none', display: 'flex' }}
+                  className="card-3d"
+                  onClick={() => router.push(`/products?category_id=${cat.id}`)}
+                  sx={{
+                    width: '100%', cursor: 'pointer',
+                    border: '2px solid transparent',
+                    transition: 'all 0.3s',
+                    '&:hover': { border: `2px solid ${color}40` },
+                  }}
                 >
-                  <Card
-                    className="card-3d"
-                    sx={{
-                      width: '100%', cursor: 'pointer',
-                      border: '2px solid transparent',
-                      transition: 'all 0.3s',
-                      '&:hover': { border: `2px solid ${color}40` },
-                    }}
-                  >
                     <CardContent sx={{ p: 3 }}>
                       {/* Header row */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -182,7 +180,7 @@ export default function CategoriesPage() {
                         </Box>
 
                         <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1917' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827' }}>
                             {cat.name}
                           </Typography>
                           <Chip
@@ -206,7 +204,6 @@ export default function CategoriesPage() {
                       </Box>
                     </CardContent>
                   </Card>
-                </Link>
               );
             })}
           </Box>

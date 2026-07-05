@@ -221,7 +221,7 @@ function AddressFormDialog({ open, userId, editData, onSaved, onClose }) {
           </TextField>
           <Box sx={{ gridColumn: { sm: '1 / -1' } }}>
             <FormControlLabel
-              control={<Checkbox checked={form.is_default} onChange={(e) => setForm((p) => ({ ...p, is_default: e.target.checked }))} sx={{ color: '#1B4332', '&.Mui-checked': { color: '#1B4332' } }} />}
+              control={<Checkbox checked={form.is_default} onChange={(e) => setForm((p) => ({ ...p, is_default: e.target.checked }))} sx={{ color: '#16A34A', '&.Mui-checked': { color: '#16A34A' } }} />}
               label={<Typography variant="body2" fontWeight={600}>Set as default address</Typography>}
             />
           </Box>
@@ -231,7 +231,7 @@ function AddressFormDialog({ open, userId, editData, onSaved, onClose }) {
         <Button onClick={onClose} disabled={saving}>Cancel</Button>
         <Button variant="contained" onClick={handleSave} disabled={saving}
           startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
-          sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
+          sx={{ background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } }}>
           {saving ? 'Saving…' : editData?.id ? 'Update Address' : 'Save Address'}
         </Button>
       </DialogActions>
@@ -278,8 +278,8 @@ function AddressesTab({ userId }) {
 
   const typeIcon = (type) => {
     if (type === 'work')  return <Work   sx={{ fontSize: 16, color: '#1565C0' }} />;
-    if (type === 'home')  return <Home   sx={{ fontSize: 16, color: '#1B4332' }} />;
-    return                       <Place  sx={{ fontSize: 16, color: '#78716C' }} />;
+    if (type === 'home')  return <Home   sx={{ fontSize: 16, color: '#16A34A' }} />;
+    return                       <Place  sx={{ fontSize: 16, color: '#4B5563' }} />;
   };
 
   return (
@@ -288,7 +288,7 @@ function AddressesTab({ userId }) {
         <Typography variant="h6" fontWeight={700}>My Addresses</Typography>
         <Button variant="contained" startIcon={<Add />}
           onClick={() => { setEditData(null); setDialogOpen(true); }}
-          sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', borderRadius: '50px', fontWeight: 700, '&:hover': { background: '#0D2B1F' } }}>
+          sx={{ background: 'linear-gradient(135deg, #16A34A, #4ADE80)', borderRadius: '50px', fontWeight: 700, '&:hover': { background: '#15803D' } }}>
           Add Address
         </Button>
       </Box>
@@ -307,7 +307,7 @@ function AddressesTab({ userId }) {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {addresses.map((addr) => (
-            <Paper key={addr.id} sx={{ p: 2.5, borderRadius: 3, border: addr.is_default ? '2px solid #1B4332' : '1px solid #E7E5E4' }}>
+            <Paper key={addr.id} sx={{ p: 2.5, borderRadius: 3, border: addr.is_default ? '2px solid #16A34A' : '1px solid #E7E5E4' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
@@ -328,7 +328,7 @@ function AddressesTab({ userId }) {
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
                   <IconButton size="small" onClick={() => { setEditData(addr); setDialogOpen(true); }}
-                    sx={{ color: '#1B4332', bgcolor: '#D8F3DC', '&:hover': { bgcolor: '#B7E4C7' } }}
+                    sx={{ color: '#16A34A', bgcolor: '#F0FDF4', '&:hover': { bgcolor: '#BBF7D0' } }}
                     aria-label={`Edit address for ${addr.name}`}>
                     <Edit fontSize="small" />
                   </IconButton>
@@ -519,7 +519,7 @@ export default function ProfilePage() {
   const displayName = profile.name || state.user?.name || '…';
 
   const stats = [
-    { icon: <ShoppingBag sx={{ fontSize: 28 }} />, label: 'Orders',    value: orderCount,   color: '#1B4332' },
+    { icon: <ShoppingBag sx={{ fontSize: 28 }} />, label: 'Orders',    value: orderCount,   color: '#16A34A' },
     { icon: <LocationOn  sx={{ fontSize: 28 }} />, label: 'Addresses', value: addressCount, color: '#1565C0' },
   ];
 
@@ -532,16 +532,16 @@ export default function ProfilePage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             <Box sx={{ position: 'relative', flexShrink: 0 }}>
               <Avatar src={avatarSrc ?? undefined}
-                sx={{ width: 72, height: 72, bgcolor: '#F59E0B', color: '#1C1917', fontSize: 28, fontWeight: 800 }}>
+                sx={{ width: 72, height: 72, bgcolor: '#FF6B35', color: '#111827', fontSize: 28, fontWeight: 800 }}>
                 {getInitials(displayName)}
               </Avatar>
               <IconButton size="small" onClick={() => fileInputRef.current?.click()} aria-label="Change avatar"
-                sx={{ position: 'absolute', bottom: -4, right: -4, bgcolor: '#F59E0B', color: '#1C1917', width: 26, height: 26, '&:hover': { bgcolor: '#D97706' }, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                sx={{ position: 'absolute', bottom: -4, right: -4, bgcolor: '#FF6B35', color: '#111827', width: 26, height: 26, '&:hover': { bgcolor: '#E5501A' }, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
                 <CameraAlt sx={{ fontSize: 14 }} />
               </IconButton>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp"
@@ -571,13 +571,13 @@ export default function ProfilePage() {
                   <ListItem disablePadding onClick={() => setTab(item.key)}
                     sx={{
                       py: 1.8, px: 2.5, display: 'flex', alignItems: 'center', gap: 1.5,
-                      bgcolor: tab === item.key ? '#D8F3DC' : 'transparent',
-                      borderLeft: tab === item.key ? '4px solid #1B4332' : '4px solid transparent',
+                      bgcolor: tab === item.key ? '#F0FDF4' : 'transparent',
+                      borderLeft: tab === item.key ? '4px solid #16A34A' : '4px solid transparent',
                       cursor: 'pointer', transition: 'all 0.2s',
-                      '&:hover': { bgcolor: '#F5F0E8' },
+                      '&:hover': { bgcolor: '#F0FDF4' },
                     }}>
-                    <Box sx={{ color: tab === item.key ? '#1B4332' : '#57534E', display: 'flex' }}>{item.icon}</Box>
-                    <Typography variant="body2" sx={{ fontWeight: tab === item.key ? 700 : 500, color: tab === item.key ? '#1B4332' : '#57534E', fontSize: 14 }}>
+                    <Box sx={{ color: tab === item.key ? '#16A34A' : '#4B5563', display: 'flex' }}>{item.icon}</Box>
+                    <Typography variant="body2" sx={{ fontWeight: tab === item.key ? 700 : 500, color: tab === item.key ? '#16A34A' : '#4B5563', fontSize: 14 }}>
                       {item.label}
                     </Typography>
                   </ListItem>
@@ -611,7 +611,7 @@ export default function ProfilePage() {
                       startIcon={saving ? <CircularProgress size={16} color="inherit" /> : editing ? <Save /> : <Edit />}
                       variant={editing ? 'contained' : 'outlined'} disabled={saving}
                       onClick={editing ? handleSave : () => setEditing(true)}
-                      sx={editing ? { background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } } : {}}>
+                      sx={editing ? { background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } } : {}}>
                       {saving ? 'Saving…' : editing ? 'Save Changes' : 'Edit Profile'}
                     </Button>
                   </Box>
@@ -694,7 +694,7 @@ export default function ProfilePage() {
                 <Button variant="contained" onClick={handleChangePassword}
                   disabled={pwdSaving || !passwords.newPass || !passwords.confirm}
                   startIcon={pwdSaving ? <CircularProgress size={16} color="inherit" /> : null}
-                  sx={{ mt: 3, px: 4, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
+                  sx={{ mt: 3, px: 4, background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } }}>
                   {pwdSaving ? 'Changing…' : 'Change Password'}
                 </Button>
               </Paper>

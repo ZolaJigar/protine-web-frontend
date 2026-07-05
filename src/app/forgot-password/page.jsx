@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
     <Box
       sx={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', py: 4,
+        background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 4,
       }}
     >
       <Container maxWidth="xs">
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
                 />
                 <Button
                   type="submit" fullWidth variant="contained" size="large" disabled={loading}
-                  sx={{ py: 1.5, fontWeight: 700, background: 'linear-gradient(135deg, #2E7D32, #4CAF50)', mb: 2 }}
+                  sx={{ py: 1.5, fontWeight: 700, background: 'linear-gradient(135deg, #4ADE80, #4ADE80)', mb: 2 }}
                 >
                   {loading ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
                 </Button>

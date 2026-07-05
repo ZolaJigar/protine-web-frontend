@@ -21,14 +21,14 @@ import { useApp } from '@/context/AppContext';
 import { addressesAPI, couponsAPI, ordersAPI, locationsAPI } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/functions';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const fmt = (v) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 })
     .format(Number(v) || 0);
 
 const STEPS = ['Select Address', 'Apply Coupon', 'Confirm & Place'];
 
-// ─── Address Card ─────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Address Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function AddressCard({ address, selected, onSelect }) {
   return (
     <Paper
@@ -36,15 +36,15 @@ function AddressCard({ address, selected, onSelect }) {
       elevation={selected ? 4 : 1}
       sx={{
         p: 2.5, borderRadius: 3, cursor: 'pointer', border: '2px solid',
-        borderColor: selected ? '#1B4332' : '#E7E5E4',
-        bgcolor: selected ? '#D8F3DC' : '#fff',
+        borderColor: selected ? '#16A34A' : '#E5E7EB',
+        bgcolor: selected ? '#F0FDF4' : '#fff',
         transition: 'all 0.2s',
-        '&:hover': { borderColor: '#1B4332' },
+        '&:hover': { borderColor: '#16A34A' },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
         <FormControlLabel
-          control={<Radio checked={selected} onChange={onSelect} sx={{ color: '#1B4332', '&.Mui-checked': { color: '#1B4332' }, pt: 0 }} />}
+          control={<Radio checked={selected} onChange={onSelect} sx={{ color: '#16A34A', '&.Mui-checked': { color: '#16A34A' }, pt: 0 }} />}
           label=""
           sx={{ m: 0 }}
         />
@@ -61,7 +61,7 @@ function AddressCard({ address, selected, onSelect }) {
             {address.landmark ? ` (${address.landmark})` : ''}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {address.city?.name}, {address.state?.name} — {address.postal_code}
+            {address.city?.name}, {address.state?.name} ΓÇö {address.postal_code}
           </Typography>
           <Typography variant="body2" color="text.secondary">{address.country?.name}</Typography>
         </Box>
@@ -70,7 +70,7 @@ function AddressCard({ address, selected, onSelect }) {
   );
 }
 
-// ─── New Address Form ─────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ New Address Form ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function AddressForm({ userId, onSaved, onCancel }) {
   const [form, setForm] = useState({
     name: '', mobile: '', dialCode: '91', email: '',
@@ -199,7 +199,7 @@ function AddressForm({ userId, onSaved, onCancel }) {
         slotProps={{ inputLabel: { shrink: true } }}
       >
         {loadingCountries
-          ? <MenuItem disabled>Loading…</MenuItem>
+          ? <MenuItem disabled>LoadingΓÇª</MenuItem>
           : countries.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)
         }
       </TextField>
@@ -213,7 +213,7 @@ function AddressForm({ userId, onSaved, onCancel }) {
         slotProps={{ inputLabel: { shrink: true } }}
       >
         {loadingStates
-          ? <MenuItem disabled>Loading…</MenuItem>
+          ? <MenuItem disabled>LoadingΓÇª</MenuItem>
           : states.length === 0
             ? <MenuItem disabled>{form.country_id ? 'No states found' : 'Select country first'}</MenuItem>
             : states.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)
@@ -229,7 +229,7 @@ function AddressForm({ userId, onSaved, onCancel }) {
         slotProps={{ inputLabel: { shrink: true } }}
       >
         {loadingCities
-          ? <MenuItem disabled>Loading…</MenuItem>
+          ? <MenuItem disabled>LoadingΓÇª</MenuItem>
           : cities.length === 0
             ? <MenuItem disabled>{form.state_id ? 'No cities found' : 'Select state first'}</MenuItem>
             : cities.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)
@@ -240,7 +240,7 @@ function AddressForm({ userId, onSaved, onCancel }) {
         <Button onClick={onCancel} variant="text" disabled={saving}>Cancel</Button>
         <Button onClick={handleSave} variant="contained" disabled={saving}
           startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
-          sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
+          sx={{ background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } }}>
           Save Address
         </Button>
       </Box>
@@ -248,7 +248,7 @@ function AddressForm({ userId, onSaved, onCancel }) {
   );
 }
 
-// ─── Order Summary Sidebar ────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Order Summary Sidebar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function OrderSummary({ summary, coupon, items }) {
   const subtotal  = Number(summary.subtotal_amount || 0);
   const discount  = coupon ? Number(coupon.discount_amount || 0) : 0;
@@ -265,10 +265,10 @@ function OrderSummary({ summary, coupon, items }) {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
           {items.map((item) => (
             <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
-              <Typography variant="body2" sx={{ color: '#57534E', flex: 1 }}>
+              <Typography variant="body2" sx={{ color: '#4B5563', flex: 1 }}>
                 {item.product?.name ?? item.product_name}
-                {item.productVariant?.name ? ` — ${item.productVariant.name}` : ''}
-                {' '}<Typography component="span" variant="caption" color="text.disabled">×{item.quantity}</Typography>
+                {item.productVariant?.name ? ` ΓÇö ${item.productVariant.name}` : ''}
+                {' '}<Typography component="span" variant="caption" color="text.disabled">├ù{item.quantity}</Typography>
               </Typography>
               <Typography variant="body2" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>
                 {fmt(item.total_price)}
@@ -290,7 +290,7 @@ function OrderSummary({ summary, coupon, items }) {
             <Typography color="text.secondary">
               Coupon <Chip label={coupon.coupon_code} size="small" sx={{ fontSize: 10, height: 18, ml: 0.5 }} />
             </Typography>
-            <Typography fontWeight={600} color="success.main">− {fmt(discount)}</Typography>
+            <Typography fontWeight={600} color="success.main">ΓêÆ {fmt(discount)}</Typography>
           </Box>
         )}
         {tax > 0 && (
@@ -311,13 +311,13 @@ function OrderSummary({ summary, coupon, items }) {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant="h6" fontWeight={700}>Total</Typography>
-        <Typography variant="h6" fontWeight={900} sx={{ color: '#1B4332' }}>{fmt(total)}</Typography>
+        <Typography variant="h6" fontWeight={900} sx={{ color: '#16A34A' }}>{fmt(total)}</Typography>
       </Box>
     </Paper>
   );
 }
 
-// ─── Step 1: Address ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Step 1: Address ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function AddressStep({ user, selectedId, onSelect, onSelectObj }) {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -369,7 +369,7 @@ function AddressStep({ user, selectedId, onSelect, onSelectObj }) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="subtitle1" fontWeight={700}>Saved Addresses</Typography>
         <Button size="small" startIcon={<Add />} onClick={() => setShowForm((p) => !p)}
-          sx={{ fontWeight: 600, color: '#1B4332' }}>
+          sx={{ fontWeight: 600, color: '#16A34A' }}>
           {showForm ? 'Cancel' : 'Add New'}
         </Button>
       </Box>
@@ -402,7 +402,7 @@ function AddressStep({ user, selectedId, onSelect, onSelectObj }) {
   );
 }
 
-// ─── Step 2: Coupon ───────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Step 2: Coupon ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
   const [code, setCode]         = useState(appliedCoupon?.coupon_code ?? '');
   const [validating, setValidating] = useState(false);
@@ -452,14 +452,14 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
       <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Have a coupon?</Typography>
 
       {appliedCoupon ? (
-        <Paper sx={{ p: 2.5, borderRadius: 3, bgcolor: '#D8F3DC', border: '2px solid #1B4332', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Paper sx={{ p: 2.5, borderRadius: 3, bgcolor: '#F0FDF4', border: '2px solid #16A34A', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <LocalOffer sx={{ color: '#1B4332', fontSize: 20 }} />
-              <Typography fontWeight={700} color="#1B4332">{appliedCoupon.coupon_code}</Typography>
+              <LocalOffer sx={{ color: '#16A34A', fontSize: 20 }} />
+              <Typography fontWeight={700} color="#16A34A">{appliedCoupon.coupon_code}</Typography>
             </Box>
-            <Typography variant="body2" color="#2D6A4F" sx={{ mt: 0.5 }}>
-              You save {fmt(appliedCoupon.discount_amount)} → Final: {fmt(appliedCoupon.final_amount)}
+            <Typography variant="body2" color="#4ADE80" sx={{ mt: 0.5 }}>
+              You save {fmt(appliedCoupon.discount_amount)} ΓåÆ Final: {fmt(appliedCoupon.final_amount)}
             </Typography>
           </Box>
           <Button size="small" color="error" onClick={() => { onRemove(); setCode(''); }} sx={{ fontWeight: 700 }}>
@@ -477,13 +477,13 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
               slotProps={{ htmlInput: { style: { textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 } } }}
             />
             <Button variant="contained" onClick={() => handleApply()} disabled={validating || !code.trim()}
-              sx={{ px: 3, whiteSpace: 'nowrap', background: '#1B4332', '&:hover': { background: '#0D2B1F' } }}>
+              sx={{ px: 3, whiteSpace: 'nowrap', background: '#16A34A', '&:hover': { background: '#15803D' } }}>
               {validating ? <CircularProgress size={18} color="inherit" /> : 'Apply'}
             </Button>
           </Box>
           <Button size="small" onClick={loadAvailable} disabled={loadingList}
             startIcon={loadingList ? <CircularProgress size={14} /> : <LocalOffer />}
-            sx={{ color: '#1B4332', fontWeight: 600 }}>
+            sx={{ color: '#16A34A', fontWeight: 600 }}>
             View available coupons
           </Button>
         </>
@@ -495,16 +495,16 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
             <Paper key={c.id} sx={{ p: 2, borderRadius: 2, border: '1.5px dashed #CBD5E1' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#1B4332' }}>{c.coupon_code}</Typography>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#16A34A' }}>{c.coupon_code}</Typography>
                   <Typography variant="body2" color="text.secondary">{c.title}</Typography>
                   <Typography variant="caption" color="text.disabled">
-                    {c.discount_type === 'percentage' ? `${c.discount_value}% off` : `₹${c.discount_value} off`}
-                    {c.minimum_order_amount > 0 ? ` · Min ₹${c.minimum_order_amount}` : ''}
-                    {c.end_date ? ` · Valid till ${formatDate(c.end_date)}` : ''}
+                    {c.discount_type === 'percentage' ? `${c.discount_value}% off` : `Γé╣${c.discount_value} off`}
+                    {c.minimum_order_amount > 0 ? ` ┬╖ Min Γé╣${c.minimum_order_amount}` : ''}
+                    {c.end_date ? ` ┬╖ Valid till ${formatDate(c.end_date)}` : ''}
                   </Typography>
                 </Box>
                 <Button size="small" variant="outlined" onClick={() => { setCode(c.coupon_code); handleApply(c.coupon_code); }}
-                  sx={{ mt: 0.5, fontSize: 12, color: '#1B4332', borderColor: '#1B4332', '&:hover': { bgcolor: '#D8F3DC' } }}>
+                  sx={{ mt: 0.5, fontSize: 12, color: '#16A34A', borderColor: '#16A34A', '&:hover': { bgcolor: '#F0FDF4' } }}>
                   Apply
                 </Button>
               </Box>
@@ -516,7 +516,7 @@ function CouponStep({ subtotal, appliedCoupon, onApply, onRemove }) {
   );
 }
 
-// ─── Step 3: Confirm ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Step 3: Confirm ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
   const subtotal  = Number(summary.subtotal_amount || 0);
   const discount  = coupon ? Number(coupon.discount_amount || 0) : 0;
@@ -528,7 +528,7 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Address review */}
       <Paper sx={{ p: 2.5, borderRadius: 3 }}>
-        <Typography variant="overline" sx={{ color: '#F59E0B', fontWeight: 700, letterSpacing: 1.5 }}>
+        <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 1.5 }}>
           Delivering To
         </Typography>
         <Typography variant="subtitle1" fontWeight={700} sx={{ mt: 0.5 }}>{address?.name}</Typography>
@@ -538,17 +538,17 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
           {address?.landmark ? ` (${address.landmark})` : ''}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {address?.city?.name}, {address?.state?.name} — {address?.postal_code}
+          {address?.city?.name}, {address?.state?.name} ΓÇö {address?.postal_code}
         </Typography>
       </Paper>
 
       {/* Coupon summary */}
       {coupon && (
-        <Paper sx={{ p: 2, borderRadius: 3, bgcolor: '#D8F3DC', border: '1px solid #52B788' }}>
+        <Paper sx={{ p: 2, borderRadius: 3, bgcolor: '#F0FDF4', border: '1px solid #4ADE80' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LocalOffer sx={{ color: '#1B4332', fontSize: 18 }} />
-            <Typography variant="body2" fontWeight={700} color="#1B4332">
-              Coupon <strong>{coupon.coupon_code}</strong> applied — saving {fmt(discount)}
+            <LocalOffer sx={{ color: '#16A34A', fontSize: 18 }} />
+            <Typography variant="body2" fontWeight={700} color="#16A34A">
+              Coupon <strong>{coupon.coupon_code}</strong> applied ΓÇö saving {fmt(discount)}
             </Typography>
           </Box>
         </Paper>
@@ -564,7 +564,7 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
           {discount > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography color="text.secondary">Discount</Typography>
-              <Typography color="success.main">− {fmt(discount)}</Typography>
+              <Typography color="success.main">ΓêÆ {fmt(discount)}</Typography>
             </Box>
           )}
           {tax > 0 && (
@@ -581,7 +581,7 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
           <Divider sx={{ my: 0.5 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography fontWeight={800} variant="subtitle1">Total</Typography>
-            <Typography fontWeight={900} variant="subtitle1" sx={{ color: '#1B4332' }}>{fmt(total)}</Typography>
+            <Typography fontWeight={900} variant="subtitle1" sx={{ color: '#16A34A' }}>{fmt(total)}</Typography>
           </Box>
         </Box>
       </Paper>
@@ -589,7 +589,7 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
       {/* Order notes */}
       <TextField
         label="Order Notes (optional)" multiline rows={2} size="small" fullWidth
-        placeholder="e.g. Leave at door, call before delivery…"
+        placeholder="e.g. Leave at door, call before deliveryΓÇª"
         value={notes} onChange={(e) => onNotesChange(e.target.value)}
         slotProps={{ htmlInput: { maxLength: 500 } }}
         helperText={`${notes.length}/500`}
@@ -598,17 +598,17 @@ function ConfirmStep({ address, coupon, notes, onNotesChange, summary }) {
   );
 }
 
-// ─── Success Screen ───────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Success Screen ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function OrderSuccess({ order }) {
   return (
     <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
       <Box sx={{ textAlign: 'center', maxWidth: 480 }}>
         <CheckCircle sx={{ fontSize: 96, color: 'success.main', mb: 2 }} />
-        <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>Order Placed! 🎉</Typography>
+        <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>Order Placed! ≡ƒÄë</Typography>
         <Typography color="text.secondary" sx={{ mb: 1 }}>
           Your order has been confirmed and will be processed shortly.
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1B4332', mb: 0.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#16A34A', mb: 0.5 }}>
           {order.order_number}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -618,11 +618,11 @@ function OrderSuccess({ order }) {
           <Button
             component={Link} href={`/orders/${order.id}`} variant="contained"
             endIcon={<ArrowForward />}
-            sx={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', borderRadius: '50px', px: 4, fontWeight: 700 }}>
+            sx={{ background: 'linear-gradient(135deg, #16A34A, #4ADE80)', borderRadius: '50px', px: 4, fontWeight: 700 }}>
             Track Order
           </Button>
           <Button component={Link} href="/products" variant="outlined"
-            sx={{ borderRadius: '50px', px: 4, fontWeight: 700, borderColor: '#1B4332', color: '#1B4332' }}>
+            sx={{ borderRadius: '50px', px: 4, fontWeight: 700, borderColor: '#16A34A', color: '#16A34A' }}>
             Continue Shopping
           </Button>
         </Box>
@@ -631,7 +631,7 @@ function OrderSuccess({ order }) {
   );
 }
 
-// ─── Main Checkout Page ───────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Main Checkout Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export default function CheckoutPage() {
   const router          = useRouter();
   const { state, fetchCart } = useApp();
@@ -697,7 +697,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) { toast.error('Please select a delivery address.'); return; }
     setPlacing(true);
-    const toastId = toast.loading('Placing your order…');
+    const toastId = toast.loading('Placing your orderΓÇª');
     try {
       const payload = { address_id: selectedAddressId };
       if (appliedCoupon?.coupon_code) payload.coupon_code = appliedCoupon.coupon_code;
@@ -706,7 +706,7 @@ export default function CheckoutPage() {
       const res = await ordersAPI.place(payload);
       const order = res.data?.data;
       toast.update(toastId, {
-        render: `🎉 Order ${order.order_number} placed!`,
+        render: `≡ƒÄë Order ${order.order_number} placed!`,
         type: 'success', isLoading: false, autoClose: 4000,
       });
       await fetchCart(); // clear cart badge
@@ -714,18 +714,18 @@ export default function CheckoutPage() {
     } catch (err) {
       const data = err?.response?.data;
       let msg = data?.message || 'Something went wrong. Please try again.';
-      // Validation errors — show the first field error
+      // Validation errors ΓÇö show the first field error
       if (data?.errors && typeof data.errors === 'object') {
         const firstKey = Object.keys(data.errors)[0];
         msg = data.errors[firstKey] || msg;
       }
       toast.update(toastId, { render: msg, type: 'error', isLoading: false, autoClose: 5000 });
 
-      // Stock errors — go back to cart
+      // Stock errors ΓÇö go back to cart
       if (msg.toLowerCase().includes('stock') || msg.toLowerCase().includes('available')) {
         setTimeout(() => router.replace('/cart'), 2500);
       }
-      // Coupon errors — remove coupon and stay on coupon step
+      // Coupon errors ΓÇö remove coupon and stay on coupon step
       if (
         msg.toLowerCase().includes('coupon') ||
         msg.toLowerCase().includes('usage limit') ||
@@ -773,7 +773,7 @@ export default function CheckoutPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', py: 5, color: '#FFF8F0' }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
         <Container maxWidth="xl">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <ShoppingCart sx={{ fontSize: 32 }} />
@@ -809,15 +809,15 @@ export default function CheckoutPage() {
               {activeStep < STEPS.length - 1 ? (
                 <Button
                   variant="contained" onClick={handleNext} endIcon={<ArrowForward />}
-                  sx={{ px: 4, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', '&:hover': { background: '#0D2B1F' } }}>
+                  sx={{ px: 4, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } }}>
                   Continue
                 </Button>
               ) : (
                 <Button
                   variant="contained" onClick={handlePlaceOrder} disabled={placing}
                   startIcon={placing ? <CircularProgress size={18} color="inherit" /> : <CheckCircle />}
-                  sx={{ px: 5, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #1B4332, #2D6A4F)', boxShadow: '0 4px 14px rgba(27,67,50,0.35)', '&:hover': { background: '#0D2B1F' } }}>
-                  {placing ? 'Placing Order…' : 'Place Order'}
+                  sx={{ px: 5, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #16A34A, #4ADE80)', boxShadow: '0 4px 14px rgba(22,163,74,0.35)', '&:hover': { background: '#15803D' } }}>
+                  {placing ? 'Placing OrderΓÇª' : 'Place Order'}
                 </Button>
               )}
             </Box>

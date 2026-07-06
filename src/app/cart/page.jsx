@@ -116,7 +116,7 @@ function CartItem({ item, onUpdate, onRemove }) {
 
         {/* Pricing row */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#16A34A' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#FF5722' }}>
             {fmt(item.unit_price)}
           </Typography>
           {item.productVariant?.mrp && Number(item.productVariant.mrp) > Number(item.unit_price) && (
@@ -174,7 +174,7 @@ function CartItem({ item, onUpdate, onRemove }) {
             {removing ? <CircularProgress size={18} color="inherit" /> : <Delete fontSize="small" />}
           </IconButton>
 
-          <Typography variant="body2" sx={{ fontWeight: 700, color: '#16A34A', ml: 'auto' }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, color: '#FF5722', ml: 'auto' }}>
             {fmt(item.total_price)}
           </Typography>
         </Box>
@@ -218,9 +218,7 @@ function EmptyCart() {
         size="large"
         endIcon={<ArrowForward />}
         sx={{
-          px: 5, py: 1.5, borderRadius: '50px', fontWeight: 700,
-          background: 'linear-gradient(135deg, #16A34A, #4ADE80)',
-          '&:hover': { background: 'linear-gradient(135deg, #15803D, #16A34A)' },
+          px: 5, py: 1.5, fontWeight: 700,
         }}
       >
         Browse Products
@@ -271,17 +269,18 @@ export default function CartPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
-        <Container maxWidth="xl">
+      <Box className="page-banner" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <ShoppingCartOutlined sx={{ fontSize: 36 }} />
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+            <ShoppingCartOutlined sx={{ fontSize: 28, color: '#FF5722' }} />
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
               My Cart
             </Typography>
             {!loading && hasItems && (
               <Chip
                 label={`${summary.total_items} ${summary.total_items === 1 ? 'item' : 'items'}`}
-                sx={{ bgcolor: '#FF6B35', color: '#15803D', fontWeight: 700 }}
+                size="small"
+                sx={{ bgcolor: '#FF5722', color: '#FFFFFF', fontWeight: 700, fontSize: '0.75rem' }}
               />
             )}
           </Box>
@@ -402,7 +401,7 @@ export default function CartPage() {
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="h6" fontWeight={700}>Total</Typography>
-                <Typography variant="h6" fontWeight={900} sx={{ color: '#16A34A' }}>
+                <Typography variant="h6" fontWeight={900} sx={{ color: '#FF5722' }}>
                   {fmt(summary.grand_total)}
                 </Typography>
               </Box>
@@ -415,10 +414,8 @@ export default function CartPage() {
                 size="large"
                 endIcon={<ArrowForward />}
                 sx={{
-                  py: 1.5, fontWeight: 700, borderRadius: '50px', textTransform: 'none', fontSize: 16,
-                  background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)',
-                  boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
-                  '&:hover': { background: 'linear-gradient(135deg, #15803D 0%, #16A34A 100%)' },
+                  py: 1.5, fontWeight: 700, textTransform: 'none', fontSize: '0.95rem',
+                  boxShadow: 'none',
                 }}
               >
                 Proceed to Checkout

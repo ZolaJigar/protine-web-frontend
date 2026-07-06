@@ -3,175 +3,257 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
-  Box, Container, Typography, Button, Grid, Chip,
-  IconButton, Skeleton,
+  Box, Container, Typography, Button, Chip, Skeleton, IconButton,
 } from '@mui/material';
-import {
-  ShoppingCart, PlayCircle, LocalShipping, Security, Star,
-  ChevronLeft, ChevronRight,
-} from '@mui/icons-material';
+import { ShoppingCart, ArrowForward, ChevronLeft, ChevronRight, Star, LocalShipping, Security, VerifiedUser } from '@mui/icons-material';
 import { bannersAPI } from '@/lib/api';
 
 const stats = [
-  { value: '10K+', label: 'Happy Customers' },
-  { value: '500+', label: 'Products' },
-  { value: '50+',  label: 'Cities' },
-  { value: '4.8★', label: 'Rating' },
+  { value: '10K+',  label: 'Happy Customers' },
+  { value: '500+',  label: 'Products' },
+  { value: '50+',   label: 'Cities' },
+  { value: '4.8',   label: 'Avg Rating', suffix: '★' },
 ];
 
-// ── Static fallback hero (shown when API has no banners) ──────────────────────
+const badges = [
+  { icon: <LocalShipping sx={{ fontSize: 16 }} />, text: 'Free delivery above ₹499' },
+  { icon: <Security sx={{ fontSize: 16 }} />,      text: 'Secure payments' },
+  { icon: <VerifiedUser sx={{ fontSize: 16 }} />,  text: '100% authentic products' },
+];
+
+// ── Static fallback hero ──────────────────────────────────────────────────────
 function StaticHero() {
   return (
     <Box
-      className="hero-3d"
-      sx={{ py: { xs: 8, md: 12 }, position: 'relative', overflow: 'hidden' }}
+      sx={{
+        background: '#0F0F0F',
+        position: 'relative',
+        overflow: 'hidden',
+        py: { xs: 10, md: 14 },
+      }}
     >
-      <Container maxWidth="xl">
-        <Grid container spacing={4} sx={{ alignItems: 'center' }}>
-          {/* Left */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box className="animate-fadeInUp">
-              <Chip
-                icon={<Star sx={{ color: '#FF6B35 !important', fontSize: 16 }} />}
-                label="India's #1 Premium Food Brand"
-                sx={{ bgcolor: 'rgba(245,158,11,0.18)', color: '#FFFFFF', mb: 2.5, fontWeight: 600, border: '1px solid rgba(245,158,11,0.35)' }}
-              />
-              <Typography
-                variant="h1"
-                sx={{
-                  fontSize: { xs: '2.5rem', md: '3.5rem', lg: '4rem' },
-                  fontWeight: 900, color: '#FFFFFF', lineHeight: 1.15, mb: 2,
-                }}
-              >
-                Premium Taste,{' '}
-                <Box
-                  component="span"
-                  sx={{
-                    background: 'linear-gradient(90deg, #FF6B35, #FF8C5A)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  Healthy Choice
-                </Box>
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{ color: 'rgba(255,248,240,0.82)', mb: 4, fontWeight: 400, lineHeight: 1.8, maxWidth: 480 }}
-              >
-                Discover our premium ketchup, mayonnaise, and a world of delicious sauces.
-                Made with natural ingredients — fresh flavour in every bite.
-              </Typography>
+      {/* Background glows */}
+      <Box sx={{
+        position: 'absolute', top: '-20%', right: '-5%',
+        width: 600, height: 600,
+        background: 'radial-gradient(circle, rgba(255,87,34,0.14) 0%, transparent 65%)',
+        borderRadius: '50%', pointerEvents: 'none',
+      }} />
+      <Box sx={{
+        position: 'absolute', bottom: '-10%', left: '20%',
+        width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(34,197,94,0.07) 0%, transparent 65%)',
+        borderRadius: '50%', pointerEvents: 'none',
+      }} />
 
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 5 }}>
-                <Link href="/products" style={{ textDecoration: 'none' }}>
-                  <Button
-                    variant="contained" size="large" startIcon={<ShoppingCart />}
-                    sx={{
-                      background: 'linear-gradient(135deg, #FF6B35, #FF8C5A)',
-                      color: '#111827', px: 4, py: 1.5, fontSize: 16, fontWeight: 700,
-                      boxShadow: '0 8px 28px rgba(245,158,11,0.45)',
-                      '&:hover': { background: 'linear-gradient(135deg, #E5501A, #FF6B35)', boxShadow: '0 12px 36px rgba(245,158,11,0.55)' },
-                    }}
-                  >
-                    Shop Now
-                  </Button>
-                </Link>
-                <Button
-                  variant="outlined" size="large" startIcon={<PlayCircle />}
-                  sx={{
-                    color: '#FFFFFF', borderColor: 'rgba(255,248,240,0.45)', px: 4, py: 1.5, fontSize: 16,
-                    '&:hover': { borderColor: '#FF6B35', bgcolor: 'rgba(245,158,11,0.12)', color: '#FF6B35' },
-                  }}
-                >
-                  Watch Video
-                </Button>
-              </Box>
+      <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 6, md: 8 }, alignItems: 'center' }}>
 
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                {[
-                  { icon: <LocalShipping />, text: 'Free Delivery above ₹499' },
-                  { icon: <Security />,      text: 'Secure Payments' },
-                ].map((badge) => (
-                  <Box key={badge.text} sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                    <Box sx={{ color: '#FF6B35' }}>{badge.icon}</Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.85)', fontWeight: 500 }}>
-                      {badge.text}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
+          {/* Left content */}
+          <Box className="animate-fadeInUp">
+            {/* Eyebrow */}
+            <Box sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 1,
+              px: 1.5, py: 0.6,
+              background: 'rgba(255,87,34,0.12)',
+              border: '1px solid rgba(255,87,34,0.25)',
+              borderRadius: '100px',
+              mb: 3,
+            }}>
+              <Star sx={{ fontSize: 14, color: '#FF5722' }} />
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#FF5722', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                India's #1 Premium Food Brand
+              </Typography>
             </Box>
-          </Grid>
 
-          {/* Right — floating logo */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: { xs: 300, md: 420 } }}>
-              <Box sx={{ position: 'absolute', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)' }} />
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: '2.6rem', sm: '3.2rem', md: '3.8rem', lg: '4.4rem' },
+                fontWeight: 900,
+                color: '#FFFFFF',
+                lineHeight: 1.1,
+                letterSpacing: '-0.035em',
+                mb: 2.5,
+              }}
+            >
+              Premium Taste,{' '}
               <Box
-                className="animate-float"
+                component="span"
                 sx={{
-                  width: 300, height: 300, borderRadius: '50%',
-                  background: 'rgba(255,248,240,0.10)',
-                  backdropFilter: 'blur(12px)',
-                  border: '2px solid rgba(255,248,240,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 30px 80px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                  zIndex: 1,
+                  color: '#FF5722',
+                  position: 'relative',
+                  display: 'inline-block',
                 }}
               >
-                <Box
-                  component="img"
-                  src="/logo_without_bg.png"
-                  alt="Protine Web"
-                  sx={{ width: 260, height: 260, objectFit: 'contain', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.25))' }}
-                />
+                Healthy Choice
               </Box>
-              {[
-                { emoji: '🥣', label: 'Ketchup',   top: '5%',   left: '5%',  delay: '0s' },
-                { emoji: '🫙', label: 'Mayo',       top: '5%',   right: '5%', delay: '0.5s' },
-                { emoji: '🌿', label: 'Organic',    bottom: '10%', left: '5%',  delay: '1s' },
-                { emoji: '⭐', label: '4.8 Rating', bottom: '10%', right: '5%', delay: '1.5s' },
-              ].map((item) => (
-                <Box
-                  key={item.label}
+            </Typography>
+
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.55)',
+                fontSize: { xs: '1rem', md: '1.1rem' },
+                lineHeight: 1.75,
+                mb: 4,
+                maxWidth: 500,
+                fontWeight: 400,
+              }}
+            >
+              Discover our premium ketchup, mayonnaise, and healthy food products.
+              Made with natural ingredients — fresh flavour in every bite.
+            </Typography>
+
+            {/* CTAs */}
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 5 }}>
+              <Link href="/products" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<ShoppingCart sx={{ fontSize: 18 }} />}
+                  sx={{ fontWeight: 700, fontSize: '0.95rem', px: 3.5, py: 1.4 }}
+                >
+                  Shop Now
+                </Button>
+              </Link>
+              <Link href="/categories" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
                   sx={{
-                    position: 'absolute',
-                    top: item.top, left: item.left, right: item.right, bottom: item.bottom,
-                    bgcolor: '#FFFFFF', borderRadius: 3,
-                    px: 1.5, py: 1, display: 'flex', alignItems: 'center', gap: 0.8,
-                    boxShadow: '0 6px 20px rgba(27,67,50,0.18)',
-                    animation: `float 3s ease-in-out ${item.delay} infinite`,
+                    color: 'rgba(255,255,255,0.7)',
+                    borderColor: 'rgba(255,255,255,0.2)',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    px: 3.5, py: 1.4,
+                    borderWidth: '1.5px',
+                    '&:hover': {
+                      borderColor: '#FF5722',
+                      color: '#FF5722',
+                      background: 'rgba(255,87,34,0.06)',
+                      borderWidth: '1.5px',
+                    },
                   }}
                 >
-                  <Typography sx={{ fontSize: 20 }}>{item.emoji}</Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#111827', whiteSpace: 'nowrap' }}>
-                    {item.label}
+                  Browse Categories
+                </Button>
+              </Link>
+            </Box>
+
+            {/* Trust badges */}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, md: 3 } }}>
+              {badges.map((b) => (
+                <Box key={b.text} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Box sx={{ color: '#FF5722' }}>{b.icon}</Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontWeight: 500 }}>
+                    {b.text}
                   </Typography>
                 </Box>
               ))}
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
 
-        {/* Stats */}
-        <Grid container spacing={2} sx={{ mt: 4 }}>
-          {stats.map((stat) => (
-            <Grid size={{ xs: 6, sm: 3 }} key={stat.label}>
+          {/* Right — logo visual */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: { xs: 280, md: 420 } }}>
+            {/* Outer glow ring */}
+            <Box sx={{
+              position: 'absolute',
+              width: { xs: 280, md: 380 },
+              height: { xs: 280, md: 380 },
+              borderRadius: '50%',
+              border: '1px solid rgba(255,87,34,0.15)',
+              animation: 'float 6s ease-in-out infinite',
+            }} />
+            {/* Middle ring */}
+            <Box sx={{
+              position: 'absolute',
+              width: { xs: 220, md: 300 },
+              height: { xs: 220, md: 300 },
+              borderRadius: '50%',
+              border: '1px solid rgba(255,87,34,0.08)',
+            }} />
+            {/* Logo */}
+            <Box
+              className="animate-float"
+              sx={{
+                width: { xs: 180, md: 240 },
+                height: { xs: 180, md: 240 },
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.04)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: 1,
+              }}
+            >
               <Box
+                component="img"
+                src="/logo_without_bg.png"
+                alt="Protine Web"
+                sx={{ width: '70%', height: '70%', objectFit: 'contain' }}
+              />
+            </Box>
+
+            {/* Floating chips */}
+            {[
+              { emoji: '🥣', label: 'Ketchup',   top: '8%',    left: '0%',   delay: '0s'   },
+              { emoji: '🫙', label: 'Mayo',       top: '8%',    right: '0%',  delay: '0.6s' },
+              { emoji: '💪', label: 'Proteins',   bottom: '12%', left: '0%',  delay: '1.2s' },
+              { emoji: '⭐', label: '4.8 Stars',  bottom: '12%', right: '0%', delay: '1.8s' },
+            ].map((item) => (
+              <Box
+                key={item.label}
                 sx={{
-                  textAlign: 'center',
-                  bgcolor: 'rgba(255,248,240,0.10)',
-                  borderRadius: 3, py: 2, px: 1,
-                  border: '1px solid rgba(255,248,240,0.15)',
-                  backdropFilter: 'blur(8px)',
+                  position: 'absolute',
+                  top: item.top, left: item.left, right: item.right, bottom: item.bottom,
+                  bgcolor: 'rgba(255,255,255,0.06)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '10px',
+                  px: 1.5, py: 0.8,
+                  display: 'flex', alignItems: 'center', gap: 0.75,
+                  animation: `float 4s ease-in-out ${item.delay} infinite`,
+                  zIndex: 2,
                 }}
               >
-                <Typography variant="h5" sx={{ fontWeight: 900, color: '#FF6B35' }}>{stat.value}</Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.75)', fontWeight: 500 }}>{stat.label}</Typography>
+                <Typography sx={{ fontSize: 18 }}>{item.emoji}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>
+                  {item.label}
+                </Typography>
               </Box>
-            </Grid>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Stats row */}
+        <Box
+          sx={{
+            mt: { xs: 6, md: 8 },
+            pt: { xs: 4, md: 5 },
+            borderTop: '1px solid rgba(255,255,255,0.07)',
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+            gap: 3,
+          }}
+        >
+          {stats.map((stat) => (
+            <Box key={stat.label} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+              <Typography sx={{
+                fontSize: { xs: '1.75rem', md: '2.25rem' },
+                fontWeight: 900,
+                color: '#FF5722',
+                lineHeight: 1,
+                letterSpacing: '-0.03em',
+              }}>
+                {stat.value}{stat.suffix ?? ''}
+              </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', mt: 0.5, fontWeight: 500 }}>
+                {stat.label}
+              </Typography>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );
@@ -182,32 +264,29 @@ function BannerCarousel({ banners }) {
   const [current, setCurrent] = useState(0);
   const [paused,  setPaused]  = useState(false);
   const timerRef = useRef(null);
-
   const total = banners.length;
 
   const go = useCallback((index) => {
     setCurrent((index + total) % total);
   }, [total]);
 
-  // Auto-advance every 4 s
   useEffect(() => {
     if (paused || total <= 1) return;
-    timerRef.current = setInterval(() => go(current + 1), 4000);
+    timerRef.current = setInterval(() => go(current + 1), 5000);
     return () => clearInterval(timerRef.current);
   }, [current, paused, total, go]);
 
   return (
     <Box
-      sx={{ position: 'relative', width: '100%', overflow: 'hidden', bgcolor: '#111' }}
+      sx={{ position: 'relative', width: '100%', overflow: 'hidden', background: '#0F0F0F' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Slides track */}
+      {/* Track */}
       <Box
         sx={{
           display: 'flex',
-          width: '100%',
-          transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
           transform: `translateX(-${current * 100}%)`,
           willChange: 'transform',
         }}
@@ -216,87 +295,38 @@ function BannerCarousel({ banners }) {
           <Box
             key={banner.id}
             sx={{
-              width: '100%',
-              minWidth: '100%',
-              maxWidth: '100%',
-              flexShrink: 0,
-              flexGrow: 0,
+              width: '100%', minWidth: '100%',
               position: 'relative',
-              height: { xs: 260, sm: 380, md: 500 },
+              height: { xs: 260, sm: 380, md: 520 },
               overflow: 'hidden',
-              bgcolor: '#1a1a1a',
+              bgcolor: '#111',
             }}
           >
-            {/* Banner image */}
             <Box
               component="img"
               src={banner.image}
               alt={banner.title || `Banner ${i + 1}`}
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block',
-              }}
+              sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
-
-            {/* Gradient overlay */}
-            <Box
-              sx={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to right, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.20) 60%, transparent 100%)',
-              }}
-            />
-
-            {/* Text content */}
+            <Box sx={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)',
+            }} />
             {(banner.title || banner.description) && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: { xs: 24, md: 48 },
-                  left: { xs: 20, md: 60 },
-                  maxWidth: { xs: '80%', md: 520 },
-                }}
-              >
+              <Box sx={{ position: 'absolute', bottom: { xs: 24, md: 52 }, left: { xs: 20, md: 64 }, maxWidth: { xs: '80%', md: 560 } }}>
                 {banner.title && (
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      fontWeight: 900, color: '#FFFFFF',
-                      fontSize: { xs: '1.6rem', md: '2.8rem' },
-                      lineHeight: 1.2, mb: 1,
-                      textShadow: '0 2px 12px rgba(0,0,0,0.5)',
-                    }}
-                  >
+                  <Typography variant="h3" sx={{ fontWeight: 900, color: '#FFFFFF', fontSize: { xs: '1.5rem', md: '2.8rem' }, lineHeight: 1.2, mb: 1, letterSpacing: '-0.03em' }}>
                     {banner.title}
                   </Typography>
                 )}
                 {banner.description && (
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: 'rgba(255,255,255,0.88)',
-                      fontWeight: 400,
-                      fontSize: { xs: '0.95rem', md: '1.2rem' },
-                      mb: 2.5,
-                      textShadow: '0 1px 6px rgba(0,0,0,0.4)',
-                    }}
-                  >
+                  <Typography sx={{ color: 'rgba(255,255,255,0.75)', fontSize: { xs: '0.9rem', md: '1.1rem' }, mb: 3 }}>
                     {banner.description}
                   </Typography>
                 )}
                 <Link href="/products" style={{ textDecoration: 'none' }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<ShoppingCart />}
-                    sx={{
-                      background: 'linear-gradient(135deg, #FF6B35, #FF8C5A)',
-                      color: '#111827', px: 3.5, py: 1.2, fontWeight: 700,
-                      boxShadow: '0 6px 20px rgba(245,158,11,0.45)',
-                      '&:hover': { background: 'linear-gradient(135deg, #E5501A, #FF6B35)' },
-                    }}
-                  >
+                  <Button variant="contained" startIcon={<ShoppingCart />} sx={{ fontWeight: 700, px: 3 }}>
                     Shop Now
                   </Button>
                 </Link>
@@ -306,42 +336,36 @@ function BannerCarousel({ banners }) {
         ))}
       </Box>
 
-      {/* Prev / Next arrows — only when more than 1 banner */}
+      {/* Controls */}
       {total > 1 && (
         <>
           <IconButton
             onClick={() => go(current - 1)}
-            aria-label="Previous banner"
+            aria-label="Previous"
             sx={{
-              position: 'absolute', left: { xs: 8, md: 16 }, top: '50%',
-              transform: 'translateY(-50%)',
-              bgcolor: 'rgba(0,0,0,0.40)', color: '#fff',
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.65)' },
+              position: 'absolute', left: { xs: 8, md: 20 }, top: '50%', transform: 'translateY(-50%)',
+              bgcolor: 'rgba(0,0,0,0.35)', color: '#fff', backdropFilter: 'blur(4px)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' },
+              width: 40, height: 40,
             }}
           >
             <ChevronLeft />
           </IconButton>
           <IconButton
             onClick={() => go(current + 1)}
-            aria-label="Next banner"
+            aria-label="Next"
             sx={{
-              position: 'absolute', right: { xs: 8, md: 16 }, top: '50%',
-              transform: 'translateY(-50%)',
-              bgcolor: 'rgba(0,0,0,0.40)', color: '#fff',
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.65)' },
+              position: 'absolute', right: { xs: 8, md: 20 }, top: '50%', transform: 'translateY(-50%)',
+              bgcolor: 'rgba(0,0,0,0.35)', color: '#fff', backdropFilter: 'blur(4px)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' },
+              width: 40, height: 40,
             }}
           >
             <ChevronRight />
           </IconButton>
 
-          {/* Dot indicators */}
-          <Box
-            sx={{
-              position: 'absolute', bottom: 14, left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex', gap: 1,
-            }}
-          >
+          {/* Dots */}
+          <Box sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 0.75 }}>
             {banners.map((_, i) => (
               <Box
                 key={i}
@@ -351,12 +375,11 @@ function BannerCarousel({ banners }) {
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && setCurrent(i)}
                 sx={{
-                  width: i === current ? 24 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  bgcolor: i === current ? '#FF6B35' : 'rgba(255,255,255,0.55)',
+                  width: i === current ? 20 : 6, height: 6,
+                  borderRadius: 3,
+                  bgcolor: i === current ? '#FF5722' : 'rgba(255,255,255,0.4)',
                   cursor: 'pointer',
-                  transition: 'all 0.3s',
+                  transition: 'all 0.3s ease',
                 }}
               />
             ))}
@@ -364,16 +387,6 @@ function BannerCarousel({ banners }) {
         </>
       )}
     </Box>
-  );
-}
-
-// ── Loading skeleton ──────────────────────────────────────────────────────────
-function BannerSkeleton() {
-  return (
-    <Skeleton
-      variant="rectangular"
-      sx={{ width: '100%', height: { xs: 260, sm: 380, md: 500 } }}
-    />
   );
 }
 
@@ -385,17 +398,15 @@ export default function HeroSection() {
   useEffect(() => {
     bannersAPI
       .getList({ page: 1, limit: 10 })
-      .then((res) => {
-        const list = res.data?.data?.data ?? [];
-        setBanners(list);
-      })
+      .then((res) => setBanners(res.data?.data?.data ?? []))
       .catch(() => setBanners([]))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <BannerSkeleton />;
+  if (loading) return (
+    <Skeleton variant="rectangular" sx={{ width: '100%', height: { xs: 260, sm: 380, md: 520 } }} />
+  );
 
-  // No banners from API → show original static hero
   if (banners.length === 0) return <StaticHero />;
 
   return <BannerCarousel banners={banners} />;

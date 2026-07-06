@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  Box, Container, Typography, Button,
-  CircularProgress, Alert,
-} from '@mui/material';
+import { Box, Container, Typography, Button, CircularProgress, Alert } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import ProductCard from '@/components/ProductCard';
 import { productsAPI } from '@/lib/api';
@@ -19,74 +16,60 @@ export default function FeaturedProducts() {
     productsAPI
       .getAll({ page: 1, limit: 8 })
       .then((res) => {
-        // Response shape: { data: { count, data: [...] } }
         const list = res.data?.data?.data ?? res.data?.data ?? [];
         setProducts(Array.isArray(list) ? list : []);
       })
-      .catch((err) => {
-        console.error('FeaturedProducts fetch error:', err);
-        setError(err?.response?.data?.message || 'Failed to load featured products.');
-      })
+      .catch((err) => setError(err?.response?.data?.message || 'Failed to load products.'))
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <Box sx={{ py: 8, bgcolor: '#FFF0DC' }}>
+    <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#FFFFFF' }}>
       <Container maxWidth="xl">
-        {/* Header row */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 5, flexWrap: 'wrap', gap: 2 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: { xs: 4, md: 6 }, flexWrap: 'wrap', gap: 2 }}>
           <Box>
-            <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 2 }}>
-              Top Picks
-            </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 800, color: '#16A34A', mt: 0.5 }}>
+            <Box className="section-eyebrow">Top Picks</Box>
+            <Typography variant="h3" sx={{ fontWeight: 800, color: '#0F0F0F', mt: 0.5, letterSpacing: '-0.02em', fontSize: { xs: '1.75rem', md: '2.25rem' } }}>
               Featured Products
             </Typography>
+            <Box className="divider-accent" sx={{ mt: 1.5 }} />
           </Box>
           <Link href="/products" style={{ textDecoration: 'none' }}>
-            <Button endIcon={<ArrowForward />} variant="outlined" color="primary">
-              View All Products
+            <Button
+              endIcon={<ArrowForward sx={{ fontSize: 16 }} />}
+              variant="outlined"
+              sx={{ fontWeight: 600, fontSize: '0.875rem' }}
+            >
+              View All
             </Button>
           </Link>
         </Box>
 
-        {/* Loading */}
         {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-            <CircularProgress sx={{ color: '#16A34A' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress size={32} sx={{ color: '#FF5722' }} />
           </Box>
         )}
 
-        {/* Error */}
-        {!loading && error && (
-          <Alert severity="error">{error}</Alert>
-        )}
+        {!loading && error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-        {/* Empty */}
         {!loading && !error && products.length === 0 && (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography color="text.secondary">No featured products available.</Typography>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography color="text.secondary">No products available.</Typography>
           </Box>
         )}
 
-        {/* 4-column CSS grid */}
         {!loading && !error && products.length > 0 && (
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(4, 1fr)',
-              },
-              gap: 3,
-              width: '100%',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
+              gap: 2.5,
             }}
           >
             {products.map((product) => (
-              <Box key={product.id} sx={{ display: 'flex' }}>
-                <ProductCard product={product} />
-              </Box>
+              <ProductCard key={product.id} product={product} />
             ))}
           </Box>
         )}

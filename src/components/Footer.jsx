@@ -2,24 +2,22 @@
 
 import Link from 'next/link';
 import { Box, Container, Typography, Divider, IconButton } from '@mui/material';
-import { Facebook, Instagram, YouTube, WhatsApp, Email, Phone, LocationOn } from '@mui/icons-material';
+import { Facebook, Instagram, YouTube, WhatsApp, Email, Phone, LocationOn, ArrowForward } from '@mui/icons-material';
 
 const footerLinks = {
-  'Quick Links': [
+  'Explore': [
     { label: 'Home',       href: '/' },
     { label: 'Products',   href: '/products' },
     { label: 'Categories', href: '/categories' },
-    { label: 'About Us',   href: '/about' },
-    { label: 'Blog',       href: '/blog' },
+    { label: 'Support',    href: '/support' },
   ],
-  'Customer': [
+  'Account': [
     { label: 'My Account', href: '/profile' },
     { label: 'My Orders',  href: '/orders' },
     { label: 'Cart',       href: '/cart' },
-    { label: 'Invoices',   href: '/invoices' },
-    { label: 'Support',    href: '/support' },
+    { label: 'Wishlist',   href: '/wishlist' },
   ],
-  'Policies': [
+  'Legal': [
     { label: 'Privacy Policy',   href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
     { label: 'Refund Policy',    href: '/refund' },
@@ -27,64 +25,79 @@ const footerLinks = {
   ],
 };
 
+const socials = [
+  { icon: <WhatsApp sx={{ fontSize: 18 }} />, href: 'https://wa.me/', label: 'WhatsApp' },
+  { icon: <Instagram sx={{ fontSize: 18 }} />, href: '#', label: 'Instagram' },
+  { icon: <Facebook sx={{ fontSize: 18 }} />,  href: '#', label: 'Facebook' },
+  { icon: <YouTube sx={{ fontSize: 18 }} />,   href: '#', label: 'YouTube' },
+];
+
 export default function Footer() {
   return (
     <Box
       component="footer"
       sx={{
-        background: 'linear-gradient(160deg, #16A34A 0%, #4ADE80 100%)',
+        background: '#0F0F0F',
         color: '#FFFFFF',
-        pt: 8, pb: 4, mt: 'auto',
+        pt: { xs: 6, md: 10 },
+        pb: 4,
+        mt: 'auto',
         width: '100%',
       }}
     >
       <Container maxWidth="xl">
-        {/* ── Main footer grid: brand | 3 link cols | contact ── */}
+        {/* Main grid */}
         <Box
           sx={{
             display: 'grid',
             gridTemplateColumns: {
               xs: '1fr',
               sm: 'repeat(2, 1fr)',
-              md: 'repeat(5, 1fr)',   // brand + 3 link sections + contact = 5 cols
+              md: '2fr 1fr 1fr 1fr',
             },
-            gap: { xs: 4, md: 3 },
-            width: '100%',
+            gap: { xs: 5, md: 6 },
           }}
         >
-          {/* Brand col — spans wider on md */}
-          <Box
-            sx={{
-              gridColumn: { xs: '1', sm: '1 / 3', md: '1 / 2' },
-            }}
-          >
-            <Box sx={{ mb: 2.5 }}>
+          {/* Brand */}
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
               <Box
                 component="img"
                 src="/logo_without_bg.png"
                 alt="Protine Web"
-                sx={{ height: 68, width: 68, objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}
+                sx={{ height: 44, width: 44, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
               />
+              <Typography sx={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.03em' }}>
+                Protine<Box component="span" sx={{ color: '#FF5722' }}>.</Box>
+              </Typography>
             </Box>
-            <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.72)', lineHeight: 1.9, mb: 3 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', lineHeight: 1.75, mb: 4, maxWidth: 320 }}>
               Your premium destination for ketchup, mayonnaise, and healthy food products.
-              Fresh flavours delivered to your doorstep with care.
+              Fresh flavours, fast delivery.
             </Typography>
+
+            {/* Socials */}
             <Box sx={{ display: 'flex', gap: 1 }}>
-              {[
-                { icon: <WhatsApp />, href: 'https://wa.me/', label: 'WhatsApp' },
-                { icon: <Instagram />, href: '#', label: 'Instagram' },
-                { icon: <Facebook />,  href: '#', label: 'Facebook' },
-                { icon: <YouTube />,   href: '#', label: 'YouTube' },
-              ].map((s) => (
+              {socials.map((s) => (
                 <IconButton
                   key={s.label}
-                  component="a" href={s.href} target="_blank" rel="noopener noreferrer"
-                  aria-label={s.label} size="small"
+                  component="a"
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  size="small"
                   sx={{
-                    color: 'rgba(255,248,240,0.75)',
-                    border: '1px solid rgba(255,248,240,0.2)',
-                    '&:hover': { color: '#FF6B35', borderColor: '#FF6B35', background: 'rgba(245,158,11,0.12)' },
+                    width: 36, height: 36,
+                    color: 'rgba(255,255,255,0.5)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      color: '#FF5722',
+                      borderColor: '#FF5722',
+                      background: 'rgba(255,87,34,0.1)',
+                    },
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {s.icon}
@@ -96,16 +109,30 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([section, links]) => (
             <Box key={section}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FF6B35', mb: 2 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  color: 'rgba(255,255,255,0.35)',
+                  mb: 2.5,
+                }}
+              >
                 {section}
               </Typography>
-              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
                 {links.map((link) => (
-                  <Box component="li" key={link.href} sx={{ mb: 1 }}>
+                  <Box component="li" key={link.href}>
                     <Link
                       href={link.href}
                       className="footer-link"
-                      style={{ color: 'rgba(255,248,240,0.7)', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}
+                      style={{
+                        color: 'rgba(255,255,255,0.55)',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 400,
+                      }}
                     >
                       {link.label}
                     </Link>
@@ -114,36 +141,43 @@ export default function Footer() {
               </Box>
             </Box>
           ))}
-
-          {/* Contact col */}
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#FF6B35', mb: 2 }}>
-              Contact Us
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {[
-                { icon: <Phone fontSize="small" />,    text: '+91 99999 88888' },
-                { icon: <Email fontSize="small" />,    text: 'hello@protineweb.com' },
-                { icon: <LocationOn fontSize="small" />, text: 'Mumbai, Maharashtra, India' },
-              ].map((item) => (
-                <Box key={item.text} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                  <Box sx={{ color: '#FF6B35', mt: 0.2, flexShrink: 0 }}>{item.icon}</Box>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.7)', fontSize: 13 }}>
-                    {item.text}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Box>
         </Box>
 
-        <Divider sx={{ my: 4, borderColor: 'rgba(255,248,240,0.12)' }} />
+        {/* Contact strip */}
+        <Box
+          sx={{
+            mt: { xs: 5, md: 8 },
+            p: 3,
+            borderRadius: 2,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: { xs: 2.5, md: 5 },
+            alignItems: 'center',
+          }}
+        >
+          {[
+            { icon: <Phone sx={{ fontSize: 16 }} />, text: '+91 99999 88888' },
+            { icon: <Email sx={{ fontSize: 16 }} />, text: 'hello@protineweb.com' },
+            { icon: <LocationOn sx={{ fontSize: 16 }} />, text: 'Mumbai, Maharashtra, India' },
+          ].map((item) => (
+            <Box key={item.text} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ color: '#FF5722' }}>{item.icon}</Box>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.825rem' }}>
+                {item.text}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.07)' }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.5)' }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem' }}>
             © {new Date().getFullYear()} Protine Web. All rights reserved.
           </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255,248,240,0.5)' }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem' }}>
             Made with ❤️ for food lovers
           </Typography>
         </Box>

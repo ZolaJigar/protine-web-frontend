@@ -1,61 +1,107 @@
-import { Box, Container, Typography, Paper } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import { LocalShipping, VerifiedUser, NaturePeople, SupportAgent, Payments, Refresh } from '@mui/icons-material';
 
 const features = [
-  { icon: <LocalShipping sx={{ fontSize: 40 }} />, title: 'Fast Delivery',    color: '#16A34A', desc: "Same-day delivery available in major cities. WhatsApp delivery reminders so you're always updated." },
-  { icon: <NaturePeople  sx={{ fontSize: 40 }} />, title: '100% Natural',     color: '#FF6B35', desc: 'No artificial preservatives. Made with fresh, natural ingredients for a healthier choice.' },
-  { icon: <VerifiedUser  sx={{ fontSize: 40 }} />, title: 'Quality Assured',  color: '#16A34A', desc: 'Every product passes strict quality checks. FSSAI certified and safety tested.' },
-  { icon: <Payments      sx={{ fontSize: 40 }} />, title: 'Secure Payments',  color: '#FF6B35', desc: 'Multiple payment options including UPI, cards, net banking, and COD. 100% secure checkout.' },
-  { icon: <SupportAgent  sx={{ fontSize: 40 }} />, title: '24/7 Support',     color: '#16A34A', desc: 'Our customer support team is always ready to help via chat, email, or phone.' },
-  { icon: <Refresh       sx={{ fontSize: 40 }} />, title: 'Easy Returns',     color: '#FF6B35', desc: 'Not satisfied? Return within 7 days for a full refund, no questions asked.' },
+  {
+    icon: <LocalShipping sx={{ fontSize: 24 }} />,
+    title: 'Fast Delivery',
+    desc: "Same-day delivery in major cities. WhatsApp reminders so you're always in the loop.",
+    color: '#22C55E',
+    bg: '#F0FDF4',
+  },
+  {
+    icon: <NaturePeople sx={{ fontSize: 24 }} />,
+    title: '100% Natural',
+    desc: 'No artificial preservatives. Made with fresh, natural ingredients for a healthier choice.',
+    color: '#FF5722',
+    bg: '#FFF7ED',
+  },
+  {
+    icon: <VerifiedUser sx={{ fontSize: 24 }} />,
+    title: 'Quality Assured',
+    desc: 'Every product passes strict quality checks. FSSAI certified and safety tested.',
+    color: '#3B82F6',
+    bg: '#EFF6FF',
+  },
+  {
+    icon: <Payments sx={{ fontSize: 24 }} />,
+    title: 'Secure Payments',
+    desc: 'UPI, cards, net banking, and COD. Multiple options with 100% secure checkout.',
+    color: '#9333EA',
+    bg: '#FDF4FF',
+  },
+  {
+    icon: <SupportAgent sx={{ fontSize: 24 }} />,
+    title: '24/7 Support',
+    desc: 'Our support team is always ready via chat, email, or phone — anytime you need.',
+    color: '#0D9488',
+    bg: '#F0FDFA',
+  },
+  {
+    icon: <Refresh sx={{ fontSize: 24 }} />,
+    title: 'Easy Returns',
+    desc: 'Not satisfied? Return within 7 days for a full refund, no questions asked.',
+    color: '#DC2626',
+    bg: '#FEF2F2',
+  },
 ];
 
 export default function WhyChooseUs() {
   return (
-    <Box sx={{ py: 8, bgcolor: '#FFFFFF' }}>
+    <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#FFFFFF' }}>
       <Container maxWidth="xl">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="overline" sx={{ color: '#FF6B35', fontWeight: 700, letterSpacing: 2 }}>
-            Why Us
-          </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 800, color: '#16A34A', mt: 1 }}>
+        {/* Header */}
+        <Box sx={{ mb: { xs: 5, md: 8 } }}>
+          <Box className="section-eyebrow">Why Us</Box>
+          <Typography variant="h3" sx={{ fontWeight: 800, color: '#0F0F0F', mt: 0.5, letterSpacing: '-0.02em', fontSize: { xs: '1.75rem', md: '2.25rem' }, maxWidth: 500 }}>
             Why Choose Protine Web?
           </Typography>
+          <Box className="divider-accent" sx={{ mt: 1.5 }} />
         </Box>
 
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-            gap: 3,
-            width: '100%',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 2,
           }}
         >
           {features.map((f) => (
-            <Paper
+            <Box
               key={f.title}
-              className="card-3d"
-              sx={{ p: 4, width: '100%', textAlign: 'center' }}
+              sx={{
+                p: 3, borderRadius: '14px',
+                border: '1px solid #E7E5E4',
+                background: '#FFFFFF',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  borderColor: f.color,
+                  background: f.bg,
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 8px 24px ${f.color}18`,
+                },
+              }}
             >
-                <Box
-                  sx={{
-                    width: 80, height: 80, borderRadius: '50%', mx: 'auto', mb: 2,
-                    bgcolor: f.color === '#16A34A' ? '#F0FDF4' : '#FFF0EB',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: f.color,
-                    boxShadow: `0 4px 18px ${f.color}22`,
-                  }}
-                  aria-hidden="true"
-                >
-                  {f.icon}
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#111827' }}>
-                  {f.title}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#4B5563', lineHeight: 1.8 }}>
-                  {f.desc}
-                </Typography>
-              </Paper>
+              <Box
+                sx={{
+                  width: 48, height: 48, borderRadius: '12px',
+                  bgcolor: f.bg,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: f.color,
+                  mb: 2.5,
+                  border: `1px solid ${f.color}25`,
+                }}
+                aria-hidden="true"
+              >
+                {f.icon}
+              </Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#0F0F0F', mb: 1 }}>
+                {f.title}
+              </Typography>
+              <Typography sx={{ fontSize: '0.875rem', color: '#525252', lineHeight: 1.7 }}>
+                {f.desc}
+              </Typography>
+            </Box>
           ))}
         </Box>
       </Container>

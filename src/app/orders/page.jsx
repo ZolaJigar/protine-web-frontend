@@ -152,10 +152,10 @@ export default function OrdersPage() {
 
   return (
     <MainLayout>
-      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
-        <Container maxWidth="xl">
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>My Orders</Typography>
-          <Typography sx={{ color: 'rgba(255,248,240,0.75)', mt: 0.5 }}>
+      <Box className="page-banner" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>My Orders</Typography>
+          <Typography sx={{ color: 'rgba(255,255,255,0.4)', mt: 0.5, fontSize: '0.875rem' }}>
             Track and manage your orders
           </Typography>
         </Container>

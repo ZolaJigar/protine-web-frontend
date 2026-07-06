@@ -122,11 +122,11 @@ export default function ProductsPage() {
                   key={cat.id}
                   onClick={() => handleCategoryClick(cat)}
                   sx={{
-                    px: 2, py: 1, borderRadius: 2, cursor: 'pointer', fontSize: 14, fontWeight: 500,
-                    bgcolor: isActive ? '#16A34A' : 'transparent',
-                    color:   isActive ? '#FFFFFF' : '#111827',
-                    '&:hover': { bgcolor: isActive ? '#15803D' : '#F0FDF4' },
-                    transition: 'all 0.2s',
+                    px: 1.5, py: 0.875, borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500,
+                    bgcolor: isActive ? '#FF5722' : 'transparent',
+                    color:   isActive ? '#FFFFFF' : '#525252',
+                    '&:hover': { bgcolor: isActive ? '#E64A19' : '#F5F5F4', color: isActive ? '#FFFFFF' : '#0F0F0F' },
+                    transition: 'all 0.15s',
                   }}
                 >
                   {cat.name}
@@ -147,9 +147,9 @@ export default function ProductsPage() {
         valueLabelFormat={(v) => `₹${v}`}
         sx={{
           mb: 2,
-          color: '#16A34A',
-          '& .MuiSlider-thumb': { bgcolor: '#FF6B35' },
-          '& .MuiSlider-track': { bgcolor: '#16A34A' },
+          color: '#FF5722',
+          '& .MuiSlider-thumb': { bgcolor: '#FF5722' },
+          '& .MuiSlider-track': { bgcolor: '#FF5722' },
         }}
       />
     </Box>
@@ -157,11 +157,10 @@ export default function ProductsPage() {
 
   return (
     <MainLayout>
-      {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
-        <Container maxWidth="xl">
-          <Typography variant="h4" sx={{ fontWeight: 800 }}>All Products</Typography>
-          <Typography variant="body1" sx={{ color: 'rgba(255,248,240,0.75)', mt: 0.5 }}>
+      <Box className="page-banner" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>All Products</Typography>
+          <Typography sx={{ color: 'rgba(255,255,255,0.45)', mt: 0.5, fontSize: '0.875rem' }}>
             {prodsLoading ? 'Loading…' : `${totalProducts} product${totalProducts !== 1 ? 's' : ''} found`}
           </Typography>
         </Container>

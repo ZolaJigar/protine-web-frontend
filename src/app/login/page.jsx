@@ -269,14 +269,13 @@ export default function LoginPage() {
     clearInterval(timerRef.current); setOtpTimer(0);
   };
 
-  // Shared primary button style
   const primaryBtn = {
-    py: 1.5, fontWeight: 700, textTransform: 'none', fontSize: 15, borderRadius: '50px',
-    background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)',
-    boxShadow: '0 4px 14px rgba(22,163,74,0.35)',
+    py: 1.5, fontWeight: 700, textTransform: 'none', fontSize: '0.95rem', borderRadius: '8px',
+    background: '#FF5722',
+    boxShadow: '0 2px 8px rgba(255,87,34,0.3)',
     color: '#FFFFFF',
-    '&:hover': { background: 'linear-gradient(135deg, #15803D 0%, #16A34A 100%)', boxShadow: '0 6px 20px rgba(27,67,50,0.45)' },
-    '&.Mui-disabled': { background: '#9CA3AF', boxShadow: 'none' },
+    '&:hover': { background: '#E64A19', boxShadow: '0 4px 16px rgba(255,87,34,0.4)' },
+    '&.Mui-disabled': { background: '#A3A3A3', boxShadow: 'none' },
   };
 
   return (
@@ -290,12 +289,12 @@ export default function LoginPage() {
         position: 'relative',
         overflow: 'hidden',
         height: '100vh',
-        background: 'linear-gradient(160deg, #060d0a 0%, #15803D 40%, #16A34A 100%)',
+        background: '#0F0F0F',
       }}>
         <Box sx={{ position: 'absolute', top: -10, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, #FF6B35, #E5501A)', zIndex: 10 }} />
-        <Box sx={{ position: 'absolute', top: -120, left: -100, width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 68%)', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'absolute', bottom: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(27,67,50,0.5) 0%, transparent 68%)', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.05, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '26px 26px' }} />
+        <Box sx={{ position: 'absolute', top: -120, left: -100, width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,87,34,0.12) 0%, transparent 68%)', pointerEvents: 'none' }} />
+        <Box sx={{ position: 'absolute', bottom: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 68%)', pointerEvents: 'none' }} />
+        <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.03, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '26px 26px' }} />
 
         <Box sx={{
           position: 'relative', zIndex: 2,
@@ -328,19 +327,18 @@ export default function LoginPage() {
           <Box sx={{ mt: 1.5 }}>
             <Typography sx={{ fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15, mb: 1, fontSize: { md: 24, lg: 30 } }}>
               Welcome to<br />
-              <Box component="span" sx={{ color: '#FF6B35' }}>Protine Web</Box>
+              <Box component="span" sx={{ color: '#FF5722' }}>Protine Web</Box>
             </Typography>
-            <Typography sx={{ color: 'rgba(255,248,240,0.6)', fontSize: 12.5, lineHeight: 1.6, maxWidth: 360, mb: 1.5 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 12.5, lineHeight: 1.6, maxWidth: 360, mb: 1.5 }}>
               Premium proteins, sauces &amp; healthy groceries delivered to your door.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
-              {['≡ƒÑ¢ Proteins', '≡ƒìà Sauces', '≡ƒ¢Æ Easy Orders', '≡ƒÜÜ Fast Delivery'].map(f => (
+              {['💪 Proteins', '🍅 Sauces', '🛒 Easy Orders', '🚀 Fast Delivery'].map(f => (
                 <Box key={f} sx={{
                   px: 1.4, py: 0.45, borderRadius: 99,
-                  bgcolor: 'rgba(255,248,240,0.08)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(245,158,11,0.3)',
-                  color: '#FF8C5A', fontSize: 11.5, fontWeight: 600,
+                  bgcolor: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'rgba(255,255,255,0.5)', fontSize: 11.5, fontWeight: 600,
                 }}>{f}</Box>
               ))}
             </Box>
@@ -353,7 +351,7 @@ export default function LoginPage() {
       </Box>
 
       {/* ΓòÉΓòÉ RIGHT PANEL ΓòÉΓòÉ */}
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#F1F5F0', p: { xs: 3, sm: 4 }, overflow: 'hidden', height: '100vh' }}>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#FAFAF9', p: { xs: 3, sm: 4 }, overflow: 'hidden', height: '100vh' }}>
         <Box sx={{ width: '100%', maxWidth: 400 }}>
 
           {mode !== MODE_IDENTIFIER && (

@@ -773,11 +773,11 @@ export default function CheckoutPage() {
   return (
     <MainLayout>
       {/* Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #16A34A 0%, #4ADE80 100%)', py: 5, color: '#FFFFFF' }}>
-        <Container maxWidth="xl">
+      <Box className="page-banner" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <ShoppingCart sx={{ fontSize: 32 }} />
-            <Typography variant="h4" fontWeight={800}>Checkout</Typography>
+            <ShoppingCart sx={{ fontSize: 26, color: '#FF5722' }} />
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>Checkout</Typography>
           </Box>
         </Container>
       </Box>
@@ -803,21 +803,21 @@ export default function CheckoutPage() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 variant="outlined" onClick={handleBack} disabled={activeStep === 0}
-                startIcon={<ArrowBack />} sx={{ px: 3, borderRadius: '50px', fontWeight: 600 }}>
+                startIcon={<ArrowBack />} sx={{ px: 3, fontWeight: 600 }}>
                 Back
               </Button>
               {activeStep < STEPS.length - 1 ? (
                 <Button
                   variant="contained" onClick={handleNext} endIcon={<ArrowForward />}
-                  sx={{ px: 4, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #16A34A, #4ADE80)', '&:hover': { background: '#15803D' } }}>
+                  sx={{ px: 4, fontWeight: 700 }}>
                   Continue
                 </Button>
               ) : (
                 <Button
                   variant="contained" onClick={handlePlaceOrder} disabled={placing}
                   startIcon={placing ? <CircularProgress size={18} color="inherit" /> : <CheckCircle />}
-                  sx={{ px: 5, borderRadius: '50px', fontWeight: 700, background: 'linear-gradient(135deg, #16A34A, #4ADE80)', boxShadow: '0 4px 14px rgba(22,163,74,0.35)', '&:hover': { background: '#15803D' } }}>
-                  {placing ? 'Placing OrderΓÇª' : 'Place Order'}
+                  sx={{ px: 5, fontWeight: 700 }}>
+                  {placing ? 'Placing Order…' : 'Place Order'}
                 </Button>
               )}
             </Box>

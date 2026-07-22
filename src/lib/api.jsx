@@ -403,9 +403,45 @@ export const ordersAPI = {
 
 // ─── PAYMENTS ────────────────────────────────────────────────────────────────
 export const paymentsAPI = {
-  initiate: (data) => api.post('/payments/initiate', data),
+  /**
+   * Create a Razorpay order for an existing order.
+   * POST /payments/create-order
+   * Body: { order_id }
+   * Response: { data: { payment: { id, razorpay_order_id, amount }, razorpay_key_id } }
+   */
+  createOrder: (data) => api.post('/payments/create-order', data),
+
+  /**
+   * Verify a Razorpay payment after checkout completes.
+   * POST /payments/verify
+   * Body: { razorpay_order_id, razorpay_payment_id, razorpay_signature }
+   * Response: { data: { id, status, paid_amount, paid_at } }
+   */
   verify: (data) => api.post('/payments/verify', data),
+
+  /**
+   * Retry a failed payment for an existing order.
+   * POST /payments/retry
+   * Body: { order_id }
+   * Response: same as createOrder
+   */
+  retry: (data) => api.post('/payments/retry', data),
+
+  /**
+   * Get paginated payment history for the logged-in user.
+   * GET /payments/history
+   */
   getHistory: (params) => api.get('/payments/history', { params }),
+
+  /**
+   * Get a single payment detail.
+   * GET /payments/:id
+   */
+  getById: (id) => api.get(`/payments/${id}`),
+
+  /** @deprecated use createOrder instead */
+  initiate: (data) => api.post('/payments/initiate', data),
+
   refund: (paymentId, data) => api.post(`/payments/${paymentId}/refund`, data),
 };
 

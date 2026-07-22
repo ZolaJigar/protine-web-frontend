@@ -1,4 +1,4 @@
-'use client';
+﻿﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 import MainLayout from '@/components/MainLayout';
 import PhoneInput from '@/components/PhoneInput';
 import { useApp } from '@/context/AppContext';
+import { usePayment } from '@/hooks/usePayment';
 import { addressesAPI, couponsAPI, ordersAPI, locationsAPI } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/functions';
 
@@ -651,9 +652,12 @@ export default function CheckoutPage() {
   // Notes
   const [notes, setNotes] = useState('');
 
-  // Place order
-  const [placing, setPlacing]   = useState(false);
+  // Place order + payment
+  const [placing, setPlacing]         = useState(false);
   const [placedOrder, setPlacedOrder] = useState(null);
+
+  // Payment hook — drives the Razorpay modal lifecycle
+  const { initiatePayment, paymentStatus, loading: paymentLoading } = usePayment();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -697,7 +701,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) { toast.error('Please select a delivery address.'); return; }
     setPlacing(true);
-    const toastId = toast.loading('Placing your orderΓÇª');
+    const toastId = toast.loading('Placing your order...');
     try {
       const payload = { address_id: selectedAddressId };
       if (appliedCoupon?.coupon_code) payload.coupon_code = appliedCoupon.coupon_code;
@@ -706,26 +710,29 @@ export default function CheckoutPage() {
       const res = await ordersAPI.place(payload);
       const order = res.data?.data;
       toast.update(toastId, {
-        render: `≡ƒÄë Order ${order.order_number} placed!`,
-        type: 'success', isLoading: false, autoClose: 4000,
+        render: `Order ${order.order_number} placed! Opening payment...`,
+        type: 'success', isLoading: false, autoClose: 3000,
       });
       await fetchCart(); // clear cart badge
       setPlacedOrder(order);
+
+      // Immediately open Razorpay checkout for the new order
+      initiatePayment(order.id);
     } catch (err) {
       const data = err?.response?.data;
       let msg = data?.message || 'Something went wrong. Please try again.';
-      // Validation errors ΓÇö show the first field error
+      // Validation errors - show the first field error
       if (data?.errors && typeof data.errors === 'object') {
         const firstKey = Object.keys(data.errors)[0];
         msg = data.errors[firstKey] || msg;
       }
       toast.update(toastId, { render: msg, type: 'error', isLoading: false, autoClose: 5000 });
 
-      // Stock errors ΓÇö go back to cart
+      // Stock errors - go back to cart
       if (msg.toLowerCase().includes('stock') || msg.toLowerCase().includes('available')) {
         setTimeout(() => router.replace('/cart'), 2500);
       }
-      // Coupon errors ΓÇö remove coupon and stay on coupon step
+      // Coupon errors - remove coupon and stay on coupon step
       if (
         msg.toLowerCase().includes('coupon') ||
         msg.toLowerCase().includes('usage limit') ||
@@ -739,8 +746,54 @@ export default function CheckoutPage() {
     }
   };
 
+  // After order is placed, show payment status screen while Razorpay modal is active
   if (placedOrder) {
-    return <MainLayout><OrderSuccess order={placedOrder} /></MainLayout>;
+    const isPaying = paymentStatus === 'creating' || paymentStatus === 'pending' || paymentLoading;
+    const isFailed = paymentStatus === 'failed';
+    return (
+      <MainLayout>
+        <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
+          <Box sx={{ textAlign: 'center', maxWidth: 480 }}>
+            {isPaying ? (
+              <>
+                <CircularProgress size={72} sx={{ color: '#FF5722', mb: 3 }} />
+                <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>Processing Payment</Typography>
+                <Typography color="text.secondary">
+                  Complete the payment in the Razorpay window to confirm your order.
+                </Typography>
+                <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
+                  Order: {placedOrder.order_number}
+                </Typography>
+              </>
+            ) : isFailed ? (
+              <>
+                <Box sx={{ fontSize: 72, mb: 2 }}>&#x26A0;&#xFE0F;</Box>
+                <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>Payment Not Completed</Typography>
+                <Typography color="text.secondary" sx={{ mb: 3 }}>
+                  Your order <strong>{placedOrder.order_number}</strong> was placed but payment was not completed.
+                  You can retry the payment below.
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => initiatePayment(placedOrder.id)}
+                    sx={{ background: '#FF5722', '&:hover': { background: '#E64A19' }, borderRadius: '50px', px: 4, fontWeight: 700 }}
+                  >
+                    Retry Payment
+                  </Button>
+                  <Button component={Link} href={`/orders/${placedOrder.id}`} variant="outlined"
+                    sx={{ borderRadius: '50px', px: 4, fontWeight: 700, borderColor: '#16A34A', color: '#16A34A' }}>
+                    View Order
+                  </Button>
+                </Box>
+              </>
+            ) : (
+              <OrderSuccess order={placedOrder} />
+            )}
+          </Box>
+        </Box>
+      </MainLayout>
+    );
   }
 
   if (!state.isAuthenticated) return null;
@@ -814,10 +867,10 @@ export default function CheckoutPage() {
                 </Button>
               ) : (
                 <Button
-                  variant="contained" onClick={handlePlaceOrder} disabled={placing}
-                  startIcon={placing ? <CircularProgress size={18} color="inherit" /> : <CheckCircle />}
+                  variant="contained" onClick={handlePlaceOrder} disabled={placing || paymentLoading}
+                  startIcon={(placing || paymentLoading) ? <CircularProgress size={18} color="inherit" /> : <CheckCircle />}
                   sx={{ px: 5, fontWeight: 700 }}>
-                  {placing ? 'Placing Order…' : 'Place Order'}
+                  {placing ? 'Placing Order...' : paymentLoading ? 'Processing Payment...' : 'Place Order & Pay'}
                 </Button>
               )}
             </Box>

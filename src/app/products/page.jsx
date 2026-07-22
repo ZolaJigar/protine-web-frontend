@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Box, Container, Typography, TextField, InputAdornment, Select,
@@ -22,7 +22,8 @@ const sortOptions = [
   { value: 'newest',     label: 'Newest First' },
 ];
 
-export default function ProductsPage() {
+// ── Inner component that uses useSearchParams (must be inside Suspense) ───────
+function ProductsContent() {
   const searchParams = useSearchParams();
 
   const [search,        setSearch]        = useState('');
@@ -292,5 +293,22 @@ export default function ProductsPage() {
         </Box>
       </Drawer>
     </MainLayout>
+  );
+}
+
+// ── Page export: Suspense required for useSearchParams in App Router ──────────
+export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <CircularProgress sx={{ color: '#FF5722' }} />
+          </Box>
+        </MainLayout>
+      }
+    >
+      <ProductsContent />
+    </Suspense>
   );
 }
